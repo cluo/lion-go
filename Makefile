@@ -36,14 +36,6 @@ pretest: lint vet errcheck
 test: testdeps pretest
 	go test -test.v ./testing
 
-bench-marshal: testdeps
-	go get -v go.pedge.io/tools/go-benchmark-columns
-	go test -test.v -bench . ./benchmark/marshal | go-benchmark-columns
-
-bench-long: testdeps
-	go get -v go.pedge.io/tools/go-benchmark-columns
-	go test -test.v -bench . ./benchmark/long | go-benchmark-columns
-
 clean:
 	go clean -i ./...
 
@@ -71,8 +63,6 @@ docker-test: docker-build
 	errcheck \
 	pretest \
 	test \
-	bench-marshal \
-	bench-long \
 	clean \
 	proto \
 	docker-build \

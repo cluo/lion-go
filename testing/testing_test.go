@@ -8,10 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"go.pedge.io/lion"
-	"go.pedge.io/lion/glog"
-	"go.pedge.io/lion/logrus"
 
 	"github.com/stretchr/testify/require"
 )
@@ -92,35 +89,6 @@ WARN  a warning line {"someKey":"someValue"}
 
 func TestPrintSomeStuff(t *testing.T) {
 	testPrintSomeStuff(t, lion.DefaultLogger)
-}
-
-func TestPrintSomeStuffLogrus(t *testing.T) {
-	t.Skip()
-	lion.SetLogger(lion.NewLogger(lion_logrus.NewPusher(lion_logrus.PusherOptions{})).AtLevel(lion.LevelDebug))
-	testPrintSomeStuff(t, lion.GlobalLogger())
-}
-
-func TestPrintSomeStuffLogrusForceColors(t *testing.T) {
-	//t.Skip()
-	lion.SetLogger(
-		lion.NewLogger(
-			lion_logrus.NewPusher(
-				lion_logrus.PusherOptions{
-					Formatter: &logrus.TextFormatter{
-						ForceColors: true,
-					},
-				},
-			),
-		).AtLevel(lion.LevelDebug),
-	)
-	testPrintSomeStuff(t, lion.GlobalLogger())
-}
-
-func TestPrintSomeStuffGLog(t *testing.T) {
-	t.Skip()
-	require.NoError(t, lion_glog.LogToStderr())
-	lion.SetLogger(lion.NewLogger(lion_glog.NewPusher()).AtLevel(lion.LevelDebug))
-	testPrintSomeStuff(t, lion.GlobalLogger())
 }
 
 func testPrintSomeStuff(t *testing.T, logger lion.Logger) {
