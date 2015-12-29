@@ -1,7 +1,7 @@
 /*
-Package protolog defines the main protolog functionality.
+Package lion defines the main lion functionality.
 */
-package protolog // import "go.pedge.io/protolog"
+package lion // import "go.pedge.io/lion"
 
 import (
 	"fmt"
@@ -98,7 +98,7 @@ func (l Level) String() string {
 func NameToLevel(name string) (Level, error) {
 	level, ok := nameToLevel[name]
 	if !ok {
-		return LevelNone, fmt.Errorf("protolog: no level for name: %s", name)
+		return LevelNone, fmt.Errorf("lion: no level for name: %s", name)
 	}
 	return level, nil
 }

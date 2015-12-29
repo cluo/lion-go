@@ -1,4 +1,4 @@
-package protolog
+package lion
 
 var (
 	discardPusherInstance = &discardPusher{}

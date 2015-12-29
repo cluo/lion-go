@@ -1,4 +1,4 @@
 /*
-Package protolog_testing defines testing for protolog.
+Package lion_testing defines testing for lion.
 */
-package protolog_testing // import "go.pedge.io/protolog/testing"
+package lion_testing // import "go.pedge.io/lion/testing"

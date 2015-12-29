@@ -1,10 +1,10 @@
-package protolog_gcloud_test
+package lion_gcloud_test
 
 import (
 	"os"
 
-	"go.pedge.io/protolog"
-	"go.pedge.io/protolog/gcloud"
+	"go.pedge.io/lion"
+	"go.pedge.io/lion/gcloud"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/logging/v1beta3"
@@ -12,7 +12,7 @@ import (
 
 func Example() error {
 	projectID, _ := os.LookupEnv("GCLOUD_PROJECT_ID")
-	logName := "protolog"
+	logName := "lion"
 	client, err := google.DefaultClient(
 		context.Background(),
 		logging.LoggingWriteScope,
@@ -24,13 +24,13 @@ func Example() error {
 	if err != nil {
 		return err
 	}
-	logger := protolog.NewLogger(
-		protolog_gcloud.NewPusher(
+	logger := lion.NewLogger(
+		lion_gcloud.NewPusher(
 			service.Projects.Logs.Entries,
 			projectID,
 			logName,
 		),
 	)
-	logger.Infoln("Hello from protolog!")
+	logger.Infoln("Hello from lion!")
 	return nil
 }

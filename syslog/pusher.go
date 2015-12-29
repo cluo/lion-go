@@ -1,26 +1,26 @@
-package protolog_syslog
+package lion_syslog
 
 import (
 	"log/syslog"
 
-	"go.pedge.io/protolog"
+	"go.pedge.io/lion"
 )
 
 var (
-	levelToLogFunc = map[protolog.Level]func(*syslog.Writer, string) error{
-		protolog.LevelNone:  (*syslog.Writer).Info,
-		protolog.LevelDebug: (*syslog.Writer).Debug,
-		protolog.LevelInfo:  (*syslog.Writer).Info,
-		protolog.LevelWarn:  (*syslog.Writer).Warning,
-		protolog.LevelError: (*syslog.Writer).Err,
-		protolog.LevelFatal: (*syslog.Writer).Crit,
-		protolog.LevelPanic: (*syslog.Writer).Alert,
+	levelToLogFunc = map[lion.Level]func(*syslog.Writer, string) error{
+		lion.LevelNone:  (*syslog.Writer).Info,
+		lion.LevelDebug: (*syslog.Writer).Debug,
+		lion.LevelInfo:  (*syslog.Writer).Info,
+		lion.LevelWarn:  (*syslog.Writer).Warning,
+		lion.LevelError: (*syslog.Writer).Err,
+		lion.LevelFatal: (*syslog.Writer).Crit,
+		lion.LevelPanic: (*syslog.Writer).Alert,
 	}
 )
 
 type pusher struct {
 	writer     *syslog.Writer
-	marshaller protolog.Marshaller
+	marshaller lion.Marshaller
 }
 
 func newPusher(writer *syslog.Writer, options ...PusherOption) *pusher {
@@ -35,7 +35,7 @@ func (p *pusher) Flush() error {
 	return nil
 }
 
-func (p *pusher) Push(entry *protolog.Entry) error {
+func (p *pusher) Push(entry *lion.Entry) error {
 	data, err := p.marshaller.Marshal(entry)
 	if err != nil {
 		return err

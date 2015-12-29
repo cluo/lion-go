@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package protolog.testing;
+package lion.testing;
 
 message Foo {
   string one = 1;

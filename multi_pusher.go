@@ -1,4 +1,4 @@
-package protolog
+package lion
 
 type multiPusher struct {
 	pushers []Pusher

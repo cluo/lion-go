@@ -1,4 +1,4 @@
-package protolog
+package lion
 
 import (
 	"bytes"
@@ -6,31 +6,31 @@ import (
 	"io"
 	"reflect"
 
+	"go.pedge.io/lion/pb"
 	"go.pedge.io/proto/time"
-	"go.pedge.io/protolog/pb"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/matttproud/golang_protobuf_extensions/pbutil"
 )
 
 var (
-	levelToPB = map[Level]protologpb.Level{
-		LevelNone:  protologpb.Level_LEVEL_NONE,
-		LevelDebug: protologpb.Level_LEVEL_DEBUG,
-		LevelInfo:  protologpb.Level_LEVEL_INFO,
-		LevelWarn:  protologpb.Level_LEVEL_WARN,
-		LevelError: protologpb.Level_LEVEL_ERROR,
-		LevelFatal: protologpb.Level_LEVEL_FATAL,
-		LevelPanic: protologpb.Level_LEVEL_PANIC,
+	levelToPB = map[Level]lionpb.Level{
+		LevelNone:  lionpb.Level_LEVEL_NONE,
+		LevelDebug: lionpb.Level_LEVEL_DEBUG,
+		LevelInfo:  lionpb.Level_LEVEL_INFO,
+		LevelWarn:  lionpb.Level_LEVEL_WARN,
+		LevelError: lionpb.Level_LEVEL_ERROR,
+		LevelFatal: lionpb.Level_LEVEL_FATAL,
+		LevelPanic: lionpb.Level_LEVEL_PANIC,
 	}
-	pbToLevel = map[protologpb.Level]Level{
-		protologpb.Level_LEVEL_NONE:  LevelNone,
-		protologpb.Level_LEVEL_DEBUG: LevelDebug,
-		protologpb.Level_LEVEL_INFO:  LevelInfo,
-		protologpb.Level_LEVEL_WARN:  LevelWarn,
-		protologpb.Level_LEVEL_ERROR: LevelError,
-		protologpb.Level_LEVEL_FATAL: LevelFatal,
-		protologpb.Level_LEVEL_PANIC: LevelPanic,
+	pbToLevel = map[lionpb.Level]Level{
+		lionpb.Level_LEVEL_NONE:  LevelNone,
+		lionpb.Level_LEVEL_DEBUG: LevelDebug,
+		lionpb.Level_LEVEL_INFO:  LevelInfo,
+		lionpb.Level_LEVEL_WARN:  LevelWarn,
+		lionpb.Level_LEVEL_ERROR: LevelError,
+		lionpb.Level_LEVEL_FATAL: LevelFatal,
+		lionpb.Level_LEVEL_PANIC: LevelPanic,
 	}
 )
 
@@ -51,7 +51,7 @@ func (m *delimitedMarshaller) Marshal(entry *Entry) ([]byte, error) {
 type delimitedUnmarshaller struct{}
 
 func (u *delimitedUnmarshaller) Unmarshal(reader io.Reader, entry *Entry) error {
-	pbEntry := &protologpb.Entry{}
+	pbEntry := &lionpb.Entry{}
 	if _, err := pbutil.ReadDelimited(reader, pbEntry); err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (u *delimitedUnmarshaller) Unmarshal(reader io.Reader, entry *Entry) error 
 	return nil
 }
 
-func entryToPBEntry(entry *Entry) (*protologpb.Entry, error) {
+func entryToPBEntry(entry *Entry) (*lionpb.Entry, error) {
 	contexts, err := messagesToEntryMessages(entry.Contexts)
 	if err != nil {
 		return nil, err
@@ -74,9 +74,9 @@ func entryToPBEntry(entry *Entry) (*protologpb.Entry, error) {
 	}
 	pbLevel, ok := levelToPB[entry.Level]
 	if !ok {
-		return nil, fmt.Errorf("protolog: unknown level: %v", entry.Level)
+		return nil, fmt.Errorf("lion: unknown level: %v", entry.Level)
 	}
-	return &protologpb.Entry{
+	return &lionpb.Entry{
 		Id:           entry.ID,
 		Level:        pbLevel,
 		Timestamp:    prototime.TimeToTimestamp(entry.Time),
@@ -88,7 +88,7 @@ func entryToPBEntry(entry *Entry) (*protologpb.Entry, error) {
 	}, nil
 }
 
-func pbEntryToEntry(pbEntry *protologpb.Entry) (*Entry, error) {
+func pbEntryToEntry(pbEntry *lionpb.Entry) (*Entry, error) {
 	contexts, err := entryMessagesToMessages(pbEntry.Context)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func pbEntryToEntry(pbEntry *protologpb.Entry) (*Entry, error) {
 	}
 	level, ok := pbToLevel[pbEntry.Level]
 	if !ok {
-		return nil, fmt.Errorf("protolog: unknown level: %v", pbEntry.Level)
+		return nil, fmt.Errorf("lion: unknown level: %v", pbEntry.Level)
 	}
 	return &Entry{
 		ID:           pbEntry.Id,
@@ -117,7 +117,7 @@ func pbEntryToEntry(pbEntry *protologpb.Entry) (*Entry, error) {
 // When using the stdlib json.Marshal function instead for the text Marshaller,
 // a speedup of 6X was observed!
 
-func messageToEntryMessage(message proto.Message) (*protologpb.Entry_Message, error) {
+func messageToEntryMessage(message proto.Message) (*lionpb.Entry_Message, error) {
 	if message == nil {
 		return nil, nil
 	}
@@ -125,13 +125,13 @@ func messageToEntryMessage(message proto.Message) (*protologpb.Entry_Message, er
 	if err != nil {
 		return nil, err
 	}
-	return &protologpb.Entry_Message{
+	return &lionpb.Entry_Message{
 		Name:  messageName(message),
 		Value: value,
 	}, nil
 }
 
-func entryMessageToMessage(entryMessage *protologpb.Entry_Message) (proto.Message, error) {
+func entryMessageToMessage(entryMessage *lionpb.Entry_Message) (proto.Message, error) {
 	if entryMessage == nil {
 		return nil, nil
 	}
@@ -145,11 +145,11 @@ func entryMessageToMessage(entryMessage *protologpb.Entry_Message) (proto.Messag
 	return message, nil
 }
 
-func messagesToEntryMessages(messages []proto.Message) ([]*protologpb.Entry_Message, error) {
+func messagesToEntryMessages(messages []proto.Message) ([]*lionpb.Entry_Message, error) {
 	if messages == nil {
 		return nil, nil
 	}
-	entryMessages := make([]*protologpb.Entry_Message, len(messages))
+	entryMessages := make([]*lionpb.Entry_Message, len(messages))
 	for i, message := range messages {
 		entryMessage, err := messageToEntryMessage(message)
 		if err != nil {
@@ -160,7 +160,7 @@ func messagesToEntryMessages(messages []proto.Message) ([]*protologpb.Entry_Mess
 	return entryMessages, nil
 }
 
-func entryMessagesToMessages(entryMessages []*protologpb.Entry_Message) ([]proto.Message, error) {
+func entryMessagesToMessages(entryMessages []*lionpb.Entry_Message) ([]proto.Message, error) {
 	if entryMessages == nil {
 		return nil, nil
 	}
@@ -178,7 +178,7 @@ func entryMessagesToMessages(entryMessages []*protologpb.Entry_Message) ([]proto
 func newMessage(name string) (proto.Message, error) {
 	reflectType := proto.MessageType(name)
 	if reflectType == nil {
-		return nil, fmt.Errorf("protolog: no Message registered for name: %s", name)
+		return nil, fmt.Errorf("lion: no Message registered for name: %s", name)
 	}
 
 	return reflect.New(reflectType.Elem()).Interface().(proto.Message), nil

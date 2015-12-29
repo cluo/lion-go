@@ -3,4 +3,4 @@ plugins:
   - go
 options:
   go:
-    import_path: go.pedge.io/protolog
+    import_path: go.pedge.io/lion

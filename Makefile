@@ -54,10 +54,10 @@ proto:
 	strip-package-comments testing/testing.pb.go
 
 docker-build:
-	docker build -t quay.io/pedge/protolog .
+	docker build -t quay.io/pedge/lion .
 
 docker-test: docker-build
-	docker run quay.io/pedge/protolog make test
+	docker run quay.io/pedge/lion make test
 
 .PHONY: \
 	all \

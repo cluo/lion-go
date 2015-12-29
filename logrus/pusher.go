@@ -1,4 +1,4 @@
-package protolog_logrus
+package lion_logrus
 
 import (
 	"bytes"
@@ -10,18 +10,18 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/golang/protobuf/proto"
-	"go.pedge.io/protolog"
+	"go.pedge.io/lion"
 )
 
 var (
-	levelToLogrusLevel = map[protolog.Level]logrus.Level{
-		protolog.LevelNone:  logrus.InfoLevel,
-		protolog.LevelDebug: logrus.DebugLevel,
-		protolog.LevelInfo:  logrus.InfoLevel,
-		protolog.LevelWarn:  logrus.WarnLevel,
-		protolog.LevelError: logrus.ErrorLevel,
-		protolog.LevelFatal: logrus.FatalLevel,
-		protolog.LevelPanic: logrus.PanicLevel,
+	levelToLogrusLevel = map[lion.Level]logrus.Level{
+		lion.LevelNone:  logrus.InfoLevel,
+		lion.LevelDebug: logrus.DebugLevel,
+		lion.LevelInfo:  logrus.InfoLevel,
+		lion.LevelWarn:  logrus.WarnLevel,
+		lion.LevelError: logrus.ErrorLevel,
+		lion.LevelFatal: logrus.FatalLevel,
+		lion.LevelPanic: logrus.PanicLevel,
 	}
 )
 
@@ -47,7 +47,7 @@ func newPusher(options PusherOptions) *pusher {
 	return &pusher{logger, &sync.Mutex{}, options}
 }
 
-func (p *pusher) Push(entry *protolog.Entry) error {
+func (p *pusher) Push(entry *lion.Entry) error {
 	logrusEntry, err := p.getLogrusEntry(entry)
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func (p *pusher) Flush() error {
 	return nil
 }
 
-func (p *pusher) getLogrusEntry(entry *protolog.Entry) (*logrus.Entry, error) {
+func (p *pusher) getLogrusEntry(entry *lion.Entry) (*logrus.Entry, error) {
 	logrusEntry := logrus.NewEntry(p.logger)
 	logrusEntry.Time = entry.Time
 	logrusEntry.Level = levelToLogrusLevel[entry.Level]

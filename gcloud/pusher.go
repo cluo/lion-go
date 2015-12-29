@@ -1,9 +1,9 @@
-package protolog_gcloud
+package lion_gcloud
 
 import (
 	"time"
 
-	"go.pedge.io/protolog"
+	"go.pedge.io/lion"
 	"google.golang.org/api/logging/v1beta3"
 )
 
@@ -11,14 +11,14 @@ const customServiceName = "compute.googleapis.com"
 
 var (
 	// https://cloud.google.com/logging/docs/api/ref/rest/v1beta3/projects.logs.entries/write#LogSeverity
-	severityName = map[protolog.Level]string{
-		protolog.LevelNone:  "DEFAULT",
-		protolog.LevelDebug: "DEBUG",
-		protolog.LevelInfo:  "INFO",
-		protolog.LevelWarn:  "WARNING",
-		protolog.LevelError: "ERROR",
-		protolog.LevelFatal: "ERROR",
-		protolog.LevelPanic: "ALERT",
+	severityName = map[lion.Level]string{
+		lion.LevelNone:  "DEFAULT",
+		lion.LevelDebug: "DEBUG",
+		lion.LevelInfo:  "INFO",
+		lion.LevelWarn:  "WARNING",
+		lion.LevelError: "ERROR",
+		lion.LevelFatal: "ERROR",
+		lion.LevelPanic: "ALERT",
 	}
 )
 
@@ -40,10 +40,10 @@ func newPusher(
 	}
 }
 
-func (p *pusher) Push(entry *protolog.Entry) error {
+func (p *pusher) Push(entry *lion.Entry) error {
 	id := entry.ID
 	if id == "" {
-		id = protolog.DefaultIDAllocator.Allocate()
+		id = lion.DefaultIDAllocator.Allocate()
 	}
 	_, err := p.service.Write(
 		p.projectID,

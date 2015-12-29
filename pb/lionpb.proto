@@ -2,9 +2,9 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-package protolog;
+package lion;
 
-option go_package = "protologpb";
+option go_package = "lionpb";
 
 // Level is a logging level.
 enum Level {
@@ -21,7 +21,7 @@ enum Level {
 // Entry is the object serialized for logging.
 message Entry {
   // Message represents a serialized protobuf message.
-  // The name is the name registered with protolog.
+  // The name is the name registered with lion.
   message Message {
     string name = 1;
     bytes value = 2;

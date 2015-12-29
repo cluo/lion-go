@@ -1,4 +1,4 @@
-package protolog
+package lion
 
 import (
 	"fmt"

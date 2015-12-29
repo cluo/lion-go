@@ -1,4 +1,4 @@
-package protolog_testing
+package lion_testing
 
 import (
 	"bytes"
@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"go.pedge.io/protolog"
-	"go.pedge.io/protolog/glog"
-	"go.pedge.io/protolog/logrus"
+	"go.pedge.io/lion"
+	"go.pedge.io/lion/glog"
+	"go.pedge.io/lion/logrus"
 
 	"github.com/stretchr/testify/require"
 )
@@ -19,13 +19,13 @@ import (
 func TestRoundtripAndTextMarshaller(t *testing.T) {
 	buffer := bytes.NewBuffer(nil)
 	fakeTimer := newFakeTimer(0)
-	logger := protolog.NewLogger(
-		protolog.NewWritePusher(
+	logger := lion.NewLogger(
+		lion.NewWritePusher(
 			buffer,
 		),
-		protolog.LoggerWithIDAllocator(newFakeIDAllocator()),
-		protolog.LoggerWithTimer(fakeTimer),
-	).AtLevel(protolog.LevelDebug)
+		lion.LoggerWithIDAllocator(newFakeIDAllocator()),
+		lion.LoggerWithTimer(fakeTimer),
+	).AtLevel(lion.LevelDebug)
 	logger.Debug(
 		&Foo{
 			StringField: "one",
@@ -59,13 +59,13 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 	logger.Infoln("a normal line")
 	logger.WithField("someKey", "someValue").Warnln("a warning line")
 
-	puller := protolog.NewReadPuller(
+	puller := lion.NewReadPuller(
 		buffer,
 	)
 	writeBuffer := bytes.NewBuffer(nil)
-	writePusher := protolog.NewTextWritePusher(
+	writePusher := lion.NewTextWritePusher(
 		writeBuffer,
-		protolog.TextMarshallerDisableTime(),
+		lion.TextMarshallerDisableTime(),
 	)
 	for entry, pullErr := puller.Pull(); pullErr != io.EOF; entry, pullErr = puller.Pull() {
 		require.NoError(t, pullErr)
@@ -73,9 +73,9 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 	}
 	require.Equal(
 		t,
-		`DEBUG protolog.testing.Foo {"string_field":"one","int32_field":2}
-INFO  protolog.testing.Baz {"bat":{"ban":{"string_field":"one","int32_field":2}}}
-INFO  protolog.testing.Empty {}
+		`DEBUG lion.testing.Foo {"string_field":"one","int32_field":2}
+INFO  lion.testing.Baz {"bat":{"ban":{"string_field":"one","int32_field":2}}}
+INFO  lion.testing.Empty {}
 INFO  hello
 INFO  world
 INFO  writing
@@ -91,39 +91,39 @@ WARN  a warning line {"someKey":"someValue"}
 }
 
 func TestPrintSomeStuff(t *testing.T) {
-	testPrintSomeStuff(t, protolog.DefaultLogger)
+	testPrintSomeStuff(t, lion.DefaultLogger)
 }
 
 func TestPrintSomeStuffLogrus(t *testing.T) {
 	t.Skip()
-	protolog.SetLogger(protolog.NewLogger(protolog_logrus.NewPusher(protolog_logrus.PusherOptions{})).AtLevel(protolog.LevelDebug))
-	testPrintSomeStuff(t, protolog.GlobalLogger())
+	lion.SetLogger(lion.NewLogger(lion_logrus.NewPusher(lion_logrus.PusherOptions{})).AtLevel(lion.LevelDebug))
+	testPrintSomeStuff(t, lion.GlobalLogger())
 }
 
 func TestPrintSomeStuffLogrusForceColors(t *testing.T) {
 	//t.Skip()
-	protolog.SetLogger(
-		protolog.NewLogger(
-			protolog_logrus.NewPusher(
-				protolog_logrus.PusherOptions{
+	lion.SetLogger(
+		lion.NewLogger(
+			lion_logrus.NewPusher(
+				lion_logrus.PusherOptions{
 					Formatter: &logrus.TextFormatter{
 						ForceColors: true,
 					},
 				},
 			),
-		).AtLevel(protolog.LevelDebug),
+		).AtLevel(lion.LevelDebug),
 	)
-	testPrintSomeStuff(t, protolog.GlobalLogger())
+	testPrintSomeStuff(t, lion.GlobalLogger())
 }
 
 func TestPrintSomeStuffGLog(t *testing.T) {
 	t.Skip()
-	require.NoError(t, protolog_glog.LogToStderr())
-	protolog.SetLogger(protolog.NewLogger(protolog_glog.NewPusher()).AtLevel(protolog.LevelDebug))
-	testPrintSomeStuff(t, protolog.GlobalLogger())
+	require.NoError(t, lion_glog.LogToStderr())
+	lion.SetLogger(lion.NewLogger(lion_glog.NewPusher()).AtLevel(lion.LevelDebug))
+	testPrintSomeStuff(t, lion.GlobalLogger())
 }
 
-func testPrintSomeStuff(t *testing.T, logger protolog.Logger) {
+func testPrintSomeStuff(t *testing.T, logger lion.Logger) {
 	logger.Debug(
 		&Foo{
 			StringField: "one",

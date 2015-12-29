@@ -1,24 +1,24 @@
-package protolog_glog
+package lion_glog
 
 import (
 	"github.com/golang/glog"
-	"go.pedge.io/protolog"
+	"go.pedge.io/lion"
 )
 
 var (
-	levelToLogFunc = map[protolog.Level]func(...interface{}){
-		protolog.LevelNone:  glog.Infoln,
-		protolog.LevelDebug: glog.Infoln,
-		protolog.LevelInfo:  glog.Infoln,
-		protolog.LevelWarn:  glog.Warningln,
-		protolog.LevelError: glog.Errorln,
-		protolog.LevelFatal: glog.Errorln,
-		protolog.LevelPanic: glog.Errorln,
+	levelToLogFunc = map[lion.Level]func(...interface{}){
+		lion.LevelNone:  glog.Infoln,
+		lion.LevelDebug: glog.Infoln,
+		lion.LevelInfo:  glog.Infoln,
+		lion.LevelWarn:  glog.Warningln,
+		lion.LevelError: glog.Errorln,
+		lion.LevelFatal: glog.Errorln,
+		lion.LevelPanic: glog.Errorln,
 	}
 )
 
 type pusher struct {
-	marshaller protolog.Marshaller
+	marshaller lion.Marshaller
 }
 
 func newPusher(options ...PusherOption) *pusher {
@@ -34,7 +34,7 @@ func (p *pusher) Flush() error {
 	return nil
 }
 
-func (p *pusher) Push(entry *protolog.Entry) error {
+func (p *pusher) Push(entry *lion.Entry) error {
 	data, err := p.marshaller.Marshal(entry)
 	if err != nil {
 		return err

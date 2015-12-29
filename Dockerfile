@@ -38,6 +38,6 @@ RUN go get -v \
   github.com/golang/protobuf/proto \
   github.com/golang/protobuf/protoc-gen-go
 
-RUN mkdir -p /go/src/go.pedge.io/protolog
-ADD . /go/src/go.pedge.io/protolog/
-WORKDIR /go/src/go.pedge.io/protolog
+RUN mkdir -p /go/src/go.pedge.io/lion
+ADD . /go/src/go.pedge.io/lion/
+WORKDIR /go/src/go.pedge.io/lion

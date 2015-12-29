@@ -3,7 +3,7 @@ machine:
     - docker
 dependencies:
   override:
-    - docker build -t quay.io/pedge/protolog .
+    - docker build -t quay.io/pedge/lion .
 test:
   override:
-    - docker run quay.io/pedge/protolog make test
+    - docker run quay.io/pedge/lion make test

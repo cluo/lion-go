@@ -1,4 +1,4 @@
-package protolog_benchmark_long
+package lion_benchmark_long
 
 import (
 	"io/ioutil"
@@ -12,10 +12,10 @@ import (
 	"github.com/golang/glog"
 	"github.com/stretchr/testify/require"
 	"go.pedge.io/google-protobuf"
-	"go.pedge.io/protolog"
-	"go.pedge.io/protolog/glog"
-	"go.pedge.io/protolog/logrus"
-	"go.pedge.io/protolog/testing"
+	"go.pedge.io/lion"
+	"go.pedge.io/lion/glog"
+	"go.pedge.io/lion/logrus"
+	"go.pedge.io/lion/testing"
 )
 
 const (
@@ -27,10 +27,10 @@ var (
 	arg1 = "foo"
 	arg2 = &google_protobuf.Timestamp{Seconds: 1000, Nanos: 1000}
 
-	foo = &protolog_testing.Foo{
+	foo = &lion_testing.Foo{
 		One: "one",
 		Two: 2,
-		Bar: &protolog_testing.Bar{
+		Bar: &lion_testing.Bar{
 			One: "1",
 			Two: "two",
 		},
@@ -40,11 +40,11 @@ var (
 )
 
 func BenchmarkProto(b *testing.B) {
-	runBenchmark(b, setupLogger, func(logger protolog.Logger) { logger.Print(foo) }, false)
+	runBenchmark(b, setupLogger, func(logger lion.Logger) { logger.Print(foo) }, false)
 }
 
 func BenchmarkProtoText(b *testing.B) {
-	runBenchmark(b, setupLoggerText, func(logger protolog.Logger) { logger.Print(foo) }, false)
+	runBenchmark(b, setupLoggerText, func(logger lion.Logger) { logger.Print(foo) }, false)
 }
 
 func BenchmarkProtoStd(b *testing.B) {
@@ -56,11 +56,11 @@ func BenchmarkProtoStdLogrus(b *testing.B) {
 }
 
 func BenchmarkProtoLogrus(b *testing.B) {
-	runBenchmarkLogrus(b, func() { protolog.Print(foo) }, false)
+	runBenchmarkLogrus(b, func() { lion.Print(foo) }, false)
 }
 
 func BenchmarkProtoGLog(b *testing.B) {
-	runBenchmarkGLog(b, func() { protolog.Print(foo) }, false)
+	runBenchmarkGLog(b, func() { lion.Print(foo) }, false)
 }
 
 func BenchmarkProtoStdGLog(b *testing.B) {
@@ -68,11 +68,11 @@ func BenchmarkProtoStdGLog(b *testing.B) {
 }
 
 func BenchmarkThreadProto(b *testing.B) {
-	runBenchmark(b, setupLogger, func(logger protolog.Logger) { logger.Print(foo) }, true)
+	runBenchmark(b, setupLogger, func(logger lion.Logger) { logger.Print(foo) }, true)
 }
 
 func BenchmarkThreadProtoText(b *testing.B) {
-	runBenchmark(b, setupLoggerText, func(logger protolog.Logger) { logger.Print(foo) }, true)
+	runBenchmark(b, setupLoggerText, func(logger lion.Logger) { logger.Print(foo) }, true)
 }
 
 func BenchmarkThreadProtoStd(b *testing.B) {
@@ -84,11 +84,11 @@ func BenchmarkThreadProtoStdLogrus(b *testing.B) {
 }
 
 func BenchmarkThreadProtoLogrus(b *testing.B) {
-	runBenchmarkLogrus(b, func() { protolog.Print(foo) }, true)
+	runBenchmarkLogrus(b, func() { lion.Print(foo) }, true)
 }
 
 func BenchmarkThreadProtoGLog(b *testing.B) {
-	runBenchmarkGLog(b, func() { protolog.Print(foo) }, true)
+	runBenchmarkGLog(b, func() { lion.Print(foo) }, true)
 }
 
 func BenchmarkThreadProtoStdGLog(b *testing.B) {
@@ -96,11 +96,11 @@ func BenchmarkThreadProtoStdGLog(b *testing.B) {
 }
 
 func BenchmarkFieldProto(b *testing.B) {
-	runBenchmark(b, setupLogger, func(logger protolog.Logger) { logger.WithField("key", "value").Print(foo) }, false)
+	runBenchmark(b, setupLogger, func(logger lion.Logger) { logger.WithField("key", "value").Print(foo) }, false)
 }
 
 func BenchmarkFieldProtoText(b *testing.B) {
-	runBenchmark(b, setupLoggerText, func(logger protolog.Logger) { logger.WithField("key", "value").Print(foo) }, false)
+	runBenchmark(b, setupLoggerText, func(logger lion.Logger) { logger.WithField("key", "value").Print(foo) }, false)
 }
 
 func BenchmarkFieldProtoStdLogrus(b *testing.B) {
@@ -108,11 +108,11 @@ func BenchmarkFieldProtoStdLogrus(b *testing.B) {
 }
 
 func BenchmarkString(b *testing.B) {
-	runBenchmark(b, setupLogger, func(logger protolog.Logger) { logger.Println(fooString) }, false)
+	runBenchmark(b, setupLogger, func(logger lion.Logger) { logger.Println(fooString) }, false)
 }
 
 func BenchmarkStringText(b *testing.B) {
-	runBenchmark(b, setupLoggerText, func(logger protolog.Logger) { logger.Println(fooString) }, false)
+	runBenchmark(b, setupLoggerText, func(logger lion.Logger) { logger.Println(fooString) }, false)
 }
 
 func BenchmarkStringStd(b *testing.B) {
@@ -124,11 +124,11 @@ func BenchmarkStringStdLogrus(b *testing.B) {
 }
 
 func BenchmarkStringLogrus(b *testing.B) {
-	runBenchmarkLogrus(b, func() { protolog.Println(fooString) }, false)
+	runBenchmarkLogrus(b, func() { lion.Println(fooString) }, false)
 }
 
 func BenchmarkStringGLog(b *testing.B) {
-	runBenchmarkGLog(b, func() { protolog.Println(fooString) }, false)
+	runBenchmarkGLog(b, func() { lion.Println(fooString) }, false)
 }
 
 func BenchmarkStringStdGLog(b *testing.B) {
@@ -136,11 +136,11 @@ func BenchmarkStringStdGLog(b *testing.B) {
 }
 
 func BenchmarkThreadString(b *testing.B) {
-	runBenchmark(b, setupLogger, func(logger protolog.Logger) { logger.Println(fooString) }, true)
+	runBenchmark(b, setupLogger, func(logger lion.Logger) { logger.Println(fooString) }, true)
 }
 
 func BenchmarkThreadStringText(b *testing.B) {
-	runBenchmark(b, setupLoggerText, func(logger protolog.Logger) { logger.Println(fooString) }, true)
+	runBenchmark(b, setupLoggerText, func(logger lion.Logger) { logger.Println(fooString) }, true)
 }
 
 func BenchmarkThreadStringStd(b *testing.B) {
@@ -152,11 +152,11 @@ func BenchmarkThreadStringStdLogrus(b *testing.B) {
 }
 
 func BenchmarkThreadStringLogrus(b *testing.B) {
-	runBenchmarkLogrus(b, func() { protolog.Infoln(fooString) }, true)
+	runBenchmarkLogrus(b, func() { lion.Infoln(fooString) }, true)
 }
 
 func BenchmarkThreadStringGLog(b *testing.B) {
-	runBenchmarkGLog(b, func() { protolog.Infoln(fooString) }, true)
+	runBenchmarkGLog(b, func() { lion.Infoln(fooString) }, true)
 }
 
 func BenchmarkThreadStringStdGLog(b *testing.B) {
@@ -164,11 +164,11 @@ func BenchmarkThreadStringStdGLog(b *testing.B) {
 }
 
 func BenchmarkFreeformf(b *testing.B) {
-	runBenchmark(b, setupLogger, func(logger protolog.Logger) { logger.Printf("%s %d\n", s, d) }, false)
+	runBenchmark(b, setupLogger, func(logger lion.Logger) { logger.Printf("%s %d\n", s, d) }, false)
 }
 
 func BenchmarkFreeformfText(b *testing.B) {
-	runBenchmark(b, setupLoggerText, func(logger protolog.Logger) { logger.Printf("%s %d\n", s, d) }, false)
+	runBenchmark(b, setupLoggerText, func(logger lion.Logger) { logger.Printf("%s %d\n", s, d) }, false)
 }
 
 func BenchmarkFreeformfStd(b *testing.B) {
@@ -180,11 +180,11 @@ func BenchmarkFreeformfStdLogrus(b *testing.B) {
 }
 
 func BenchmarkFreeformfLogrus(b *testing.B) {
-	runBenchmarkLogrus(b, func() { protolog.Printf("%s %d\n", s, d) }, false)
+	runBenchmarkLogrus(b, func() { lion.Printf("%s %d\n", s, d) }, false)
 }
 
 func BenchmarkFreeformfGLog(b *testing.B) {
-	runBenchmarkGLog(b, func() { protolog.Printf("%s %d\n", s, d) }, false)
+	runBenchmarkGLog(b, func() { lion.Printf("%s %d\n", s, d) }, false)
 }
 
 func BenchmarkFreeformfStdGLog(b *testing.B) {
@@ -192,11 +192,11 @@ func BenchmarkFreeformfStdGLog(b *testing.B) {
 }
 
 func BenchmarkThreadFreeformf(b *testing.B) {
-	runBenchmark(b, setupLogger, func(logger protolog.Logger) { logger.Printf("%s %d\n", s, d) }, true)
+	runBenchmark(b, setupLogger, func(logger lion.Logger) { logger.Printf("%s %d\n", s, d) }, true)
 }
 
 func BenchmarkThreadFreeformfText(b *testing.B) {
-	runBenchmark(b, setupLoggerText, func(logger protolog.Logger) { logger.Printf("%s %d\n", s, d) }, true)
+	runBenchmark(b, setupLoggerText, func(logger lion.Logger) { logger.Printf("%s %d\n", s, d) }, true)
 }
 
 func BenchmarkThreadFreeformfStd(b *testing.B) {
@@ -208,11 +208,11 @@ func BenchmarkThreadFreeformfStdLogrus(b *testing.B) {
 }
 
 func BenchmarkThreadFreeformfLogrus(b *testing.B) {
-	runBenchmarkLogrus(b, func() { protolog.Printf("%s %d\n", s, d) }, true)
+	runBenchmarkLogrus(b, func() { lion.Printf("%s %d\n", s, d) }, true)
 }
 
 func BenchmarkThreadFreeformfGLog(b *testing.B) {
-	runBenchmarkGLog(b, func() { protolog.Printf("%s %d\n", s, d) }, true)
+	runBenchmarkGLog(b, func() { lion.Printf("%s %d\n", s, d) }, true)
 }
 
 func BenchmarkThreadFreeformfStdGLog(b *testing.B) {
@@ -220,11 +220,11 @@ func BenchmarkThreadFreeformfStdGLog(b *testing.B) {
 }
 
 func BenchmarkFreeformln(b *testing.B) {
-	runBenchmark(b, setupLogger, func(logger protolog.Logger) { logger.Println(arg1, arg2) }, false)
+	runBenchmark(b, setupLogger, func(logger lion.Logger) { logger.Println(arg1, arg2) }, false)
 }
 
 func BenchmarkFreeformlnText(b *testing.B) {
-	runBenchmark(b, setupLoggerText, func(logger protolog.Logger) { logger.Println(arg1, arg2) }, false)
+	runBenchmark(b, setupLoggerText, func(logger lion.Logger) { logger.Println(arg1, arg2) }, false)
 }
 
 func BenchmarkFreeformlnStd(b *testing.B) {
@@ -236,11 +236,11 @@ func BenchmarkFreeformlnStdLogrus(b *testing.B) {
 }
 
 func BenchmarkFreeformlnLogrus(b *testing.B) {
-	runBenchmarkLogrus(b, func() { protolog.Println(arg1, arg2) }, true)
+	runBenchmarkLogrus(b, func() { lion.Println(arg1, arg2) }, true)
 }
 
 func BenchmarkFreeformlnGLog(b *testing.B) {
-	runBenchmarkGLog(b, func() { protolog.Println(arg1, arg2) }, true)
+	runBenchmarkGLog(b, func() { lion.Println(arg1, arg2) }, true)
 }
 
 func BenchmarkFreeformlnStdGLog(b *testing.B) {
@@ -248,11 +248,11 @@ func BenchmarkFreeformlnStdGLog(b *testing.B) {
 }
 
 func BenchmarkThreadFreeformln(b *testing.B) {
-	runBenchmark(b, setupLogger, func(logger protolog.Logger) { logger.Println(arg1, arg2) }, true)
+	runBenchmark(b, setupLogger, func(logger lion.Logger) { logger.Println(arg1, arg2) }, true)
 }
 
 func BenchmarkThreadFreeformlnText(b *testing.B) {
-	runBenchmark(b, setupLoggerText, func(logger protolog.Logger) { logger.Println(arg1, arg2) }, true)
+	runBenchmark(b, setupLoggerText, func(logger lion.Logger) { logger.Println(arg1, arg2) }, true)
 }
 
 func BenchmarkThreadFreeformlnStd(b *testing.B) {
@@ -264,45 +264,45 @@ func BenchmarkThreadFreeformlnStdLogrus(b *testing.B) {
 }
 
 func BenchmarkThreadFreeformlnLogrus(b *testing.B) {
-	runBenchmarkLogrus(b, func() { protolog.Println(arg1, arg2) }, true)
+	runBenchmarkLogrus(b, func() { lion.Println(arg1, arg2) }, true)
 }
 
 func BenchmarkThreadFreeformlnGLog(b *testing.B) {
-	runBenchmarkGLog(b, func() { protolog.Println(arg1, arg2) }, true)
+	runBenchmarkGLog(b, func() { lion.Println(arg1, arg2) }, true)
 }
 
 func BenchmarkThreadFreeformlnStdGLog(b *testing.B) {
 	runBenchmarkStdGLog(b, func() { glog.Infoln(arg1, arg2) }, true)
 }
 
-func setupLogger(b *testing.B) (string, *os.File, protolog.Logger) {
-	tempDir, err := ioutil.TempDir("", "protolog")
+func setupLogger(b *testing.B) (string, *os.File, lion.Logger) {
+	tempDir, err := ioutil.TempDir("", "lion")
 	require.NoError(b, err)
 	file, err := os.Create(filepath.Join(tempDir, "log.out"))
 	require.NoError(b, err)
-	logger := protolog.NewLogger(
-		protolog.NewWritePusher(
+	logger := lion.NewLogger(
+		lion.NewWritePusher(
 			file,
 		),
-	).AtLevel(protolog.LevelInfo)
+	).AtLevel(lion.LevelInfo)
 	return tempDir, file, logger
 }
 
-func setupLoggerText(b *testing.B) (string, *os.File, protolog.Logger) {
-	tempDir, err := ioutil.TempDir("", "protolog")
+func setupLoggerText(b *testing.B) (string, *os.File, lion.Logger) {
+	tempDir, err := ioutil.TempDir("", "lion")
 	require.NoError(b, err)
 	file, err := os.Create(filepath.Join(tempDir, "log.out"))
 	require.NoError(b, err)
-	logger := protolog.NewLogger(
-		protolog.NewTextWritePusher(
+	logger := lion.NewLogger(
+		lion.NewTextWritePusher(
 			file,
 		),
-	).AtLevel(protolog.LevelInfo)
+	).AtLevel(lion.LevelInfo)
 	return tempDir, file, logger
 }
 
 func setupStdLogger(b *testing.B) (string, *os.File, benchLogger) {
-	tempDir, err := ioutil.TempDir("", "protolog")
+	tempDir, err := ioutil.TempDir("", "lion")
 	require.NoError(b, err)
 	file, err := os.Create(filepath.Join(tempDir, "log.out"))
 	require.NoError(b, err)
@@ -311,7 +311,7 @@ func setupStdLogger(b *testing.B) (string, *os.File, benchLogger) {
 }
 
 func setupStdLogrusLogger(b *testing.B) (string, *os.File, benchLogger) {
-	tempDir, err := ioutil.TempDir("", "protolog")
+	tempDir, err := ioutil.TempDir("", "lion")
 	require.NoError(b, err)
 	file, err := os.Create(filepath.Join(tempDir, "log.out"))
 	require.NoError(b, err)
@@ -320,7 +320,7 @@ func setupStdLogrusLogger(b *testing.B) (string, *os.File, benchLogger) {
 	return tempDir, file, logger
 }
 
-func runBenchmark(b *testing.B, setup func(*testing.B) (string, *os.File, protolog.Logger), run func(protolog.Logger), thread bool) {
+func runBenchmark(b *testing.B, setup func(*testing.B) (string, *os.File, lion.Logger), run func(lion.Logger), thread bool) {
 	b.StopTimer()
 	tempDir, _, logger := setup(b)
 	b.StartTimer()
@@ -372,14 +372,14 @@ func runBenchmarkStd(b *testing.B, setup func(*testing.B) (string, *os.File, ben
 
 func runBenchmarkLogrus(b *testing.B, run func(), thread bool) {
 	b.StopTimer()
-	tempDir, err := ioutil.TempDir("", "protolog")
+	tempDir, err := ioutil.TempDir("", "lion")
 	require.NoError(b, err)
 	file, err := os.Create(filepath.Join(tempDir, "log.out"))
 	require.NoError(b, err)
-	protolog.SetLogger(
-		protolog.NewLogger(
-			protolog_logrus.NewPusher(
-				protolog_logrus.PusherOptions{
+	lion.SetLogger(
+		lion.NewLogger(
+			lion_logrus.NewPusher(
+				lion_logrus.PusherOptions{
 					Out: file,
 					Formatter: &logrus.TextFormatter{
 						ForceColors: true,
@@ -404,7 +404,7 @@ func runBenchmarkLogrus(b *testing.B, run func(), thread bool) {
 			run()
 		}
 	}
-	_ = protolog.Flush()
+	_ = lion.Flush()
 	b.StopTimer()
 	_ = os.RemoveAll(tempDir)
 	b.StartTimer()
@@ -412,7 +412,7 @@ func runBenchmarkLogrus(b *testing.B, run func(), thread bool) {
 
 func runBenchmarkGLog(b *testing.B, run func(), thread bool) {
 	b.StopTimer()
-	protolog.SetLogger(protolog.NewLogger(protolog_glog.NewPusher()))
+	lion.SetLogger(lion.NewLogger(lion_glog.NewPusher()))
 	b.StartTimer()
 	if thread {
 		var wg sync.WaitGroup
@@ -429,7 +429,7 @@ func runBenchmarkGLog(b *testing.B, run func(), thread bool) {
 			run()
 		}
 	}
-	_ = protolog.Flush()
+	_ = lion.Flush()
 }
 
 func runBenchmarkStdGLog(b *testing.B, run func(), thread bool) {

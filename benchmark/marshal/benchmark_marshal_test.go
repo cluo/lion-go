@@ -1,25 +1,25 @@
-package protolog_benchmark_marshal
+package lion_benchmark_marshal
 
 import (
 	"testing"
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"go.pedge.io/protolog"
-	"go.pedge.io/protolog/testing"
+	"go.pedge.io/lion"
+	"go.pedge.io/lion/testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func BenchmarkDelimitedMarshaller(b *testing.B) {
-	benchmarkMarshaller(b, protolog.DelimitedMarshaller)
+	benchmarkMarshaller(b, lion.DelimitedMarshaller)
 }
 
 func BenchmarkDefaultTextMarshaller(b *testing.B) {
-	benchmarkMarshaller(b, protolog.NewTextMarshaller())
+	benchmarkMarshaller(b, lion.NewTextMarshaller())
 }
 
-func benchmarkMarshaller(b *testing.B, marshaller protolog.Marshaller) {
+func benchmarkMarshaller(b *testing.B, marshaller lion.Marshaller) {
 	b.StopTimer()
 	entry := getBenchEntry()
 	_, err := marshaller.Marshal(entry)
@@ -30,26 +30,26 @@ func benchmarkMarshaller(b *testing.B, marshaller protolog.Marshaller) {
 	}
 }
 
-func getBenchEntry() *protolog.Entry {
-	foo := &protolog_testing.Foo{
+func getBenchEntry() *lion.Entry {
+	foo := &lion_testing.Foo{
 		StringField: "one",
 		Int32Field:  2,
 	}
-	bar := &protolog_testing.Bar{
+	bar := &lion_testing.Bar{
 		StringField: "one",
 		Int32Field:  2,
 	}
-	baz := &protolog_testing.Baz{
-		Bat: &protolog_testing.Baz_Bat{
-			Ban: &protolog_testing.Baz_Bat_Ban{
+	baz := &lion_testing.Baz{
+		Bat: &lion_testing.Baz_Bat{
+			Ban: &lion_testing.Baz_Bat_Ban{
 				StringField: "one",
 				Int32Field:  2,
 			},
 		},
 	}
-	entry := &protolog.Entry{
+	entry := &lion.Entry{
 		ID:    "123",
-		Level: protolog.LevelInfo,
+		Level: lion.LevelInfo,
 		Time:  time.Now().UTC(),
 		Contexts: []proto.Message{
 			foo,
