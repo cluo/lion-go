@@ -11,8 +11,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-
-	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -30,6 +28,13 @@ const (
 	LevelFatal Level = 5
 	// LevelPanic is the panic Level.
 	LevelPanic Level = 6
+
+	// FormatJSON is a JSON format.
+	FormatJSON = 0
+	// FormatPB is a protobuf format.
+	FormatPB = 1
+	// FormatThrift is a thrift format.
+	FormatThrift = 2
 )
 
 var (
@@ -57,6 +62,11 @@ var (
 	// DefaultLogger is the default Logger.
 	DefaultLogger = NewLogger(DefaultPusher)
 
+	globalLogger            = DefaultLogger
+	globalHooks             = make([]GlobalHook, 0)
+	globalRedirectStdLogger = false
+	globalLock              = &sync.Mutex{}
+
 	levelToName = map[Level]string{
 		LevelNone:  "NONE",
 		LevelDebug: "DEBUG",
@@ -75,11 +85,16 @@ var (
 		"FATAL": LevelFatal,
 		"PANIC": LevelPanic,
 	}
-
-	globalLogger            = DefaultLogger
-	globalHooks             = make([]GlobalHook, 0)
-	globalRedirectStdLogger = false
-	globalLock              = &sync.Mutex{}
+	formatToName = map[Format]string{
+		FormatJSON:   "JSON",
+		FormatPB:     "PB",
+		FormatThrift: "THRIFT",
+	}
+	nameToFormat = map[string]Format{
+		"JSON":   FormatJSON,
+		"PB":     FormatPB,
+		"THRIFT": FormatThrift,
+	}
 )
 
 // Level is a logging level.
@@ -101,6 +116,27 @@ func NameToLevel(name string) (Level, error) {
 		return LevelNone, fmt.Errorf("lion: no level for name: %s", name)
 	}
 	return level, nil
+}
+
+// Format is a serialized format.
+type Format int32
+
+// String returns the name of a Format or the numerical value if the Format is unknown.
+func (l Format) String() string {
+	name, ok := formatToName[l]
+	if !ok {
+		return strconv.Itoa(int(l))
+	}
+	return name
+}
+
+// NameToFormat returns the Format for the given name.
+func NameToFormat(name string) (Format, error) {
+	format, ok := nameToFormat[name]
+	if !ok {
+		return FormatJSON, fmt.Errorf("lion: no format for name: %s", name)
+	}
+	return format, nil
 }
 
 // GlobalHook is a function that handles a change in the global Logger instance.
@@ -163,15 +199,6 @@ type Logger interface {
 
 	AtLevel(level Level) Logger
 
-	WithContext(context proto.Message) Logger
-	Debug(event proto.Message)
-	Info(event proto.Message)
-	Warn(event proto.Message)
-	Error(event proto.Message)
-	Fatal(event proto.Message)
-	Panic(event proto.Message)
-	Print(event proto.Message)
-
 	DebugWriter() io.Writer
 	InfoWriter() io.Writer
 	WarnWriter() io.Writer
@@ -180,48 +207,48 @@ type Logger interface {
 
 	WithField(key string, value interface{}) Logger
 	WithFields(fields map[string]interface{}) Logger
+	Debug(args ...interface{})
 	Debugf(format string, args ...interface{})
 	Debugln(args ...interface{})
+	Info(args ...interface{})
 	Infof(format string, args ...interface{})
 	Infoln(args ...interface{})
+	Warn(args ...interface{})
 	Warnf(format string, args ...interface{})
 	Warnln(args ...interface{})
+	Error(args ...interface{})
 	Errorf(format string, args ...interface{})
 	Errorln(args ...interface{})
+	Fatal(args ...interface{})
 	Fatalf(format string, args ...interface{})
 	Fatalln(args ...interface{})
+	Panic(args ...interface{})
 	Panicf(format string, args ...interface{})
 	Panicln(args ...interface{})
+	Print(args ...interface{})
 	Printf(format string, args ...interface{})
 	Println(args ...interface{})
 }
 
-// Entry is the go equivalent of an Entry.
+// EntryMessage is a serialized context or event in an Entry.
+type EntryMessage struct {
+	Format Format      `json:"format,omitempty"`
+	Name   string      `json:"name,omitempty"`
+	Value  interface{} `json:"value,omitempty"`
+}
+
+// Entry is the a log entry.
 type Entry struct {
 	// ID may not be set depending on LoggerOptions.
 	// it is up to the user to determine if ID is required.
-	ID    string    `json:"id,omitempty"`
-	Level Level     `json:"level,omitempty"`
-	Time  time.Time `json:"time,omitempty"`
-	// both Contexts and Fields may be set
-	Contexts []proto.Message   `json:"contexts,omitempty"`
-	Fields   map[string]string `json:"fields,omitempty"`
-	// one of Event, Message, WriterOutput will be set
-	Event        proto.Message `json:"event,omitempty"`
-	Message      string        `json:"message,omitempty"`
-	WriterOutput []byte        `json:"writer_output,omitempty"`
-}
-
-// String defaults a string representation of the Entry.
-func (g *Entry) String() string {
-	if g == nil {
-		return ""
-	}
-	data, err := textMarshalEntry(g, false, false, false, true, false)
-	if err != nil {
-		return ""
-	}
-	return string(data)
+	ID           string            `json:"id,omitempty"`
+	Level        Level             `json:"level,omitempty"`
+	Time         time.Time         `json:"time,omitempty"`
+	Contexts     []*EntryMessage   `json:"contexts,omitempty"`
+	Fields       map[string]string `json:"fields,omitempty"`
+	Event        *EntryMessage     `json:"event,omitempty"`
+	Message      string            `json:"message,omitempty"`
+	WriterOutput []byte            `json:"writer_output,omitempty"`
 }
 
 // Pusher is the interface used to push Entry objects to a persistent store.
@@ -252,8 +279,8 @@ type ErrorHandler interface {
 // LoggerOption is an option for the Logger constructor.
 type LoggerOption func(*logger)
 
-// LoggerWithIDEnabled enables IDs for the Logger.
-func LoggerWithIDEnabled() LoggerOption {
+// LoggerEnableID enables IDs for the Logger.
+func LoggerEnableID() LoggerOption {
 	return func(logger *logger) {
 		logger.enableID = true
 	}
@@ -290,28 +317,16 @@ type Marshaller interface {
 	Marshal(entry *Entry) ([]byte, error)
 }
 
-// WritePusherOption is an option for constructing a new write Pusher.
-type WritePusherOption func(*writePusher)
-
-// WritePusherWithMarshaller uses the Marshaller for the write Pusher.
-//
-// By default, DelimitedMarshaller is used.
-func WritePusherWithMarshaller(marshaller Marshaller) WritePusherOption {
-	return func(writePusher *writePusher) {
-		writePusher.marshaller = marshaller
-	}
-}
-
 // NewWritePusher constructs a new Pusher that writes to the given io.Writer.
-func NewWritePusher(writer io.Writer, options ...WritePusherOption) Pusher {
+func NewWritePusher(writer io.Writer, marshaller Marshaller) Pusher {
 	return newWritePusher(writer, options...)
 }
 
-// NewTextWritePusher constructs a new Pusher using a TextMarshaller and newlines.
+// NewTextWritePusher constructs a new Pusher using a TextMarshaller.
 func NewTextWritePusher(writer io.Writer, textMarshallerOptions ...TextMarshallerOption) Pusher {
 	return NewWritePusher(
 		writer,
-		WritePusherWithMarshaller(NewTextMarshaller(textMarshallerOptions...)),
+		NewTextMarshaller(textMarshallerOptions...),
 	)
 }
 
@@ -402,46 +417,6 @@ func AtLevel(level Level) Logger {
 	return globalLogger.AtLevel(level)
 }
 
-// WithContext calls WithContext on the global Logger.
-func WithContext(context proto.Message) Logger {
-	return globalLogger.WithContext(context)
-}
-
-// Debug calls Debug on the global Logger.
-func Debug(Event proto.Message) {
-	globalLogger.Debug(Event)
-}
-
-// Info calls Info on the global Logger.
-func Info(Event proto.Message) {
-	globalLogger.Info(Event)
-}
-
-// Warn calls Warn on the global Logger.
-func Warn(Event proto.Message) {
-	globalLogger.Warn(Event)
-}
-
-// Error calls Error on the global Logger.
-func Error(Event proto.Message) {
-	globalLogger.Error(Event)
-}
-
-// Fatal calls Fatal on the global Logger.
-func Fatal(Event proto.Message) {
-	globalLogger.Fatal(Event)
-}
-
-// Panic calls Panic on the global Logger.
-func Panic(Event proto.Message) {
-	globalLogger.Panic(Event)
-}
-
-// Print calls Print on the global Logger.
-func Print(Event proto.Message) {
-	globalLogger.Print(Event)
-}
-
 // DebugWriter calls DebugWriter on the global Logger.
 func DebugWriter() io.Writer {
 	return globalLogger.DebugWriter()
@@ -477,6 +452,11 @@ func WithFields(fields map[string]interface{}) Logger {
 	return globalLogger.WithFields(fields)
 }
 
+// Debug calls Debug on the global Logger.
+func Debug(args ...interface{}) {
+	globalLogger.Debug(args...)
+}
+
 // Debugf calls Debugf on the global Logger.
 func Debugf(format string, args ...interface{}) {
 	globalLogger.Debugf(format, args...)
@@ -485,6 +465,11 @@ func Debugf(format string, args ...interface{}) {
 // Debugln calls Debugln on the global Logger.
 func Debugln(args ...interface{}) {
 	globalLogger.Debugln(args...)
+}
+
+// Info calls Info on the global Logger.
+func Info(args ...interface{}) {
+	globalLogger.Info(args...)
 }
 
 // Infof calls Infof on the global Logger.
@@ -497,6 +482,11 @@ func Infoln(args ...interface{}) {
 	globalLogger.Infoln(args...)
 }
 
+// Warn calls Warn on the global Logger.
+func Warn(args ...interface{}) {
+	globalLogger.Warn(args...)
+}
+
 // Warnf calls Warnf on the global Logger.
 func Warnf(format string, args ...interface{}) {
 	globalLogger.Warnf(format, args...)
@@ -505,6 +495,11 @@ func Warnf(format string, args ...interface{}) {
 // Warnln calls Warnln on the global Logger.
 func Warnln(args ...interface{}) {
 	globalLogger.Warnln(args...)
+}
+
+// Error calls Error on the global Logger.
+func Error(args ...interface{}) {
+	globalLogger.Error(args...)
 }
 
 // Errorf calls Errorf on the global Logger.
@@ -517,6 +512,11 @@ func Errorln(args ...interface{}) {
 	globalLogger.Errorln(args...)
 }
 
+// Fatal calls Fatal on the global Logger.
+func Fatal(args ...interface{}) {
+	globalLogger.Fatal(args...)
+}
+
 // Fatalf calls Fatalf on the global Logger.
 func Fatalf(format string, args ...interface{}) {
 	globalLogger.Fatalf(format, args...)
@@ -527,6 +527,11 @@ func Fatalln(args ...interface{}) {
 	globalLogger.Fatalln(args...)
 }
 
+// Panic calls Panic on the global Logger.
+func Panic(args ...interface{}) {
+	globalLogger.Panic(args...)
+}
+
 // Panicf calls Panicf on the global Logger.
 func Panicf(format string, args ...interface{}) {
 	globalLogger.Panicf(format, args...)
@@ -535,6 +540,11 @@ func Panicf(format string, args ...interface{}) {
 // Panicln calls Panicln on the global Logger.
 func Panicln(args ...interface{}) {
 	globalLogger.Panicln(args...)
+}
+
+// Print calls Print on the global Logger.
+func Print(args ...interface{}) {
+	globalLogger.Print(args...)
 }
 
 // Printf calls Printf on the global Logger.
