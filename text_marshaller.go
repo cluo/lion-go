@@ -7,7 +7,6 @@ import (
 	"unicode"
 
 	"github.com/fatih/color"
-	"github.com/golang/protobuf/proto"
 )
 
 var (
@@ -146,13 +145,17 @@ func textMarshalEntry(
 	return data, nil
 }
 
-func textMarshalMessage(buffer *bytes.Buffer, message proto.Message) error {
+func textMarshalMessage(buffer *bytes.Buffer, message *EntryMessage) error {
 	if message == nil {
 		return nil
 	}
-	_, _ = buffer.WriteString(messageName(message))
+	name, err := message.Name()
+	if err != nil {
+		return err
+	}
+	_, _ = buffer.WriteString(name)
 	_ = buffer.WriteByte(' ')
-	data, err := json.Marshal(message)
+	data, err := json.Marshal(message.Value)
 	if err != nil {
 		return err
 	}

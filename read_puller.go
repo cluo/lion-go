@@ -7,21 +7,17 @@ type readPuller struct {
 	unmarshaller Unmarshaller
 }
 
-func newReadPuller(reader io.Reader, options ...ReadPullerOption) *readPuller {
-	readPuller := &readPuller{
+func newReadPuller(reader io.Reader, unmarshaller Unmarshaller) *readPuller {
+	return &readPuller{
 		reader,
-		DelimitedUnmarshaller,
+		unmarshaller,
 	}
-	for _, option := range options {
-		option(readPuller)
-	}
-	return readPuller
 }
 
-func (r *readPuller) Pull() (*Entry, error) {
-	entry := &Entry{}
-	if err := r.unmarshaller.Unmarshal(r.reader, entry); err != nil {
+func (r *readPuller) Pull() (*EncodedEntry, error) {
+	encodedEntry := &EncodedEntry{}
+	if err := r.unmarshaller.Unmarshal(r.reader, encodedEntry); err != nil {
 		return nil, err
 	}
-	return entry, nil
+	return encodedEntry, nil
 }

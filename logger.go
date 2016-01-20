@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-
-	"github.com/golang/protobuf/proto"
 )
 
 type logger struct {
@@ -15,7 +13,7 @@ type logger struct {
 	timer        Timer
 	errorHandler ErrorHandler
 	level        Level
-	contexts     []proto.Message
+	contexts     []*EntryMessage
 	fields       map[string]string
 }
 
@@ -27,7 +25,7 @@ func newLogger(pusher Pusher, options ...LoggerOption) *logger {
 		DefaultTimer,
 		DefaultErrorHandler,
 		DefaultLevel,
-		make([]proto.Message, 0),
+		make([]*EntryMessage, 0),
 		make(map[string]string, 0),
 	}
 	for _, option := range options {
@@ -53,7 +51,7 @@ func (l *logger) AtLevel(level Level) Logger {
 	}
 }
 
-func (l *logger) WithContext(context proto.Message) Logger {
+func (l *logger) WithContext(context *EntryMessage) Logger {
 	return &logger{
 		l.pusher,
 		l.enableID,
@@ -64,36 +62,6 @@ func (l *logger) WithContext(context proto.Message) Logger {
 		append(l.contexts, context),
 		l.fields,
 	}
-}
-
-func (l *logger) Debug(event proto.Message) {
-	l.print(LevelDebug, event, "", nil)
-}
-
-func (l *logger) Info(event proto.Message) {
-	l.print(LevelInfo, event, "", nil)
-}
-
-func (l *logger) Warn(event proto.Message) {
-	l.print(LevelWarn, event, "", nil)
-}
-
-func (l *logger) Error(event proto.Message) {
-	l.print(LevelError, event, "", nil)
-}
-
-func (l *logger) Fatal(event proto.Message) {
-	l.print(LevelFatal, event, "", nil)
-	os.Exit(1)
-}
-
-func (l *logger) Panic(event proto.Message) {
-	l.print(LevelPanic, event, "", nil)
-	panic(fmt.Sprintf("%+v", event))
-}
-
-func (l *logger) Print(event proto.Message) {
-	l.print(LevelNone, event, "", nil)
 }
 
 func (l *logger) DebugWriter() io.Writer {
@@ -154,12 +122,20 @@ func (l *logger) WithFields(fields map[string]interface{}) Logger {
 	}
 }
 
+func (l *logger) Debug(args ...interface{}) {
+	l.print(LevelDebug, nil, fmt.Sprint(args...), nil)
+}
+
 func (l *logger) Debugf(format string, args ...interface{}) {
 	l.print(LevelDebug, nil, fmt.Sprintf(format, args...), nil)
 }
 
 func (l *logger) Debugln(args ...interface{}) {
 	l.print(LevelDebug, nil, fmt.Sprint(args...), nil)
+}
+
+func (l *logger) Info(args ...interface{}) {
+	l.print(LevelInfo, nil, fmt.Sprint(args...), nil)
 }
 
 func (l *logger) Infof(format string, args ...interface{}) {
@@ -170,6 +146,10 @@ func (l *logger) Infoln(args ...interface{}) {
 	l.print(LevelInfo, nil, fmt.Sprint(args...), nil)
 }
 
+func (l *logger) Warn(args ...interface{}) {
+	l.print(LevelWarn, nil, fmt.Sprint(args...), nil)
+}
+
 func (l *logger) Warnf(format string, args ...interface{}) {
 	l.print(LevelWarn, nil, fmt.Sprintf(format, args...), nil)
 }
@@ -178,12 +158,21 @@ func (l *logger) Warnln(args ...interface{}) {
 	l.print(LevelWarn, nil, fmt.Sprint(args...), nil)
 }
 
+func (l *logger) Error(args ...interface{}) {
+	l.print(LevelError, nil, fmt.Sprint(args...), nil)
+}
+
 func (l *logger) Errorf(format string, args ...interface{}) {
 	l.print(LevelError, nil, fmt.Sprintf(format, args...), nil)
 }
 
 func (l *logger) Errorln(args ...interface{}) {
 	l.print(LevelError, nil, fmt.Sprint(args...), nil)
+}
+
+func (l *logger) Fatal(args ...interface{}) {
+	l.print(LevelFatal, nil, fmt.Sprint(args...), nil)
+	os.Exit(1)
 }
 
 func (l *logger) Fatalf(format string, args ...interface{}) {
@@ -196,6 +185,11 @@ func (l *logger) Fatalln(args ...interface{}) {
 	os.Exit(1)
 }
 
+func (l *logger) Panic(args ...interface{}) {
+	l.print(LevelPanic, nil, fmt.Sprint(args...), nil)
+	panic(fmt.Sprint(args...))
+}
+
 func (l *logger) Panicf(format string, args ...interface{}) {
 	l.print(LevelPanic, nil, fmt.Sprintf(format, args...), nil)
 	panic(fmt.Sprintf(format, args...))
@@ -206,6 +200,10 @@ func (l *logger) Panicln(args ...interface{}) {
 	panic(fmt.Sprint(args...))
 }
 
+func (l *logger) Print(args ...interface{}) {
+	l.print(LevelNone, nil, fmt.Sprint(args...), nil)
+}
+
 func (l *logger) Printf(format string, args ...interface{}) {
 	l.print(LevelNone, nil, fmt.Sprintf(format, args...), nil)
 }
@@ -214,7 +212,11 @@ func (l *logger) Println(args ...interface{}) {
 	l.print(LevelNone, nil, fmt.Sprint(args...), nil)
 }
 
-func (l *logger) print(level Level, event proto.Message, message string, writerOutput []byte) {
+func (l *logger) LogEntryMessage(level Level, event *EntryMessage) {
+	l.print(level, event, "", nil)
+}
+
+func (l *logger) print(level Level, event *EntryMessage, message string, writerOutput []byte) {
 	if err := l.printWithError(level, event, message, writerOutput); err != nil {
 		l.errorHandler.Handle(err)
 	}
@@ -228,9 +230,14 @@ func (l *logger) printWriter(level Level) io.Writer {
 	return newLogWriter(l, level)
 }
 
-func (l *logger) printWithError(level Level, event proto.Message, message string, writerOutput []byte) error {
+func (l *logger) printWithError(level Level, event *EntryMessage, message string, writerOutput []byte) error {
 	if !l.isLoggedLevel(level) {
 		return nil
+	}
+	if event != nil {
+		if err := checkRegisteredEncoding(event.Encoding); err != nil {
+			return err
+		}
 	}
 	entry := &Entry{
 		Level: level,

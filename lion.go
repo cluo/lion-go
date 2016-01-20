@@ -4,37 +4,11 @@ Package lion defines the main lion functionality.
 package lion // import "go.pedge.io/lion"
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
-	"strconv"
 	"sync"
 	"time"
-)
-
-const (
-	// LevelNone represents no Level.
-	LevelNone Level = 0
-	// LevelDebug is the debug Level.
-	LevelDebug Level = 1
-	// LevelInfo is the info Level.
-	LevelInfo Level = 2
-	// LevelWarn is the warn Level.
-	LevelWarn Level = 3
-	// LevelError is the error Level.
-	LevelError Level = 4
-	// LevelFatal is the fatal Level.
-	LevelFatal Level = 5
-	// LevelPanic is the panic Level.
-	LevelPanic Level = 6
-
-	// FormatJSON is a JSON format.
-	FormatJSON = 0
-	// FormatPB is a protobuf format.
-	FormatPB = 1
-	// FormatThrift is a thrift format.
-	FormatThrift = 2
 )
 
 var (
@@ -47,11 +21,6 @@ var (
 	// DefaultErrorHandler is the default ErrorHandler.
 	DefaultErrorHandler = &errorHandler{}
 
-	// DelimitedMarshaller is a Marshaller that uses the protocol buffers write delimited scheme.
-	DelimitedMarshaller = &delimitedMarshaller{}
-	// DelimitedUnmarshaller is an Unmarshaller that uses the protocol buffers write delimited scheme.
-	DelimitedUnmarshaller = &delimitedUnmarshaller{}
-
 	// DiscardPusher is a Pusher that discards all logs.
 	DiscardPusher = discardPusherInstance
 	// DiscardLogger is a Logger that discards all logs.
@@ -62,82 +31,10 @@ var (
 	// DefaultLogger is the default Logger.
 	DefaultLogger = NewLogger(DefaultPusher)
 
-	globalLogger            = DefaultLogger
-	globalHooks             = make([]GlobalHook, 0)
-	globalRedirectStdLogger = false
-	globalLock              = &sync.Mutex{}
-
-	levelToName = map[Level]string{
-		LevelNone:  "NONE",
-		LevelDebug: "DEBUG",
-		LevelInfo:  "INFO",
-		LevelWarn:  "WARN",
-		LevelError: "ERROR",
-		LevelFatal: "FATAL",
-		LevelPanic: "PANIC",
-	}
-	nameToLevel = map[string]Level{
-		"NONE":  LevelNone,
-		"DEBUG": LevelDebug,
-		"INFO":  LevelInfo,
-		"WARN":  LevelWarn,
-		"ERROR": LevelError,
-		"FATAL": LevelFatal,
-		"PANIC": LevelPanic,
-	}
-	formatToName = map[Format]string{
-		FormatJSON:   "JSON",
-		FormatPB:     "PB",
-		FormatThrift: "THRIFT",
-	}
-	nameToFormat = map[string]Format{
-		"JSON":   FormatJSON,
-		"PB":     FormatPB,
-		"THRIFT": FormatThrift,
-	}
+	globalLogger = DefaultLogger
+	globalHooks  = make([]GlobalHook, 0)
+	globalLock   = &sync.Mutex{}
 )
-
-// Level is a logging level.
-type Level int32
-
-// String returns the name of a Level or the numerical value if the Level is unknown.
-func (l Level) String() string {
-	name, ok := levelToName[l]
-	if !ok {
-		return strconv.Itoa(int(l))
-	}
-	return name
-}
-
-// NameToLevel returns the Level for the given name.
-func NameToLevel(name string) (Level, error) {
-	level, ok := nameToLevel[name]
-	if !ok {
-		return LevelNone, fmt.Errorf("lion: no level for name: %s", name)
-	}
-	return level, nil
-}
-
-// Format is a serialized format.
-type Format int32
-
-// String returns the name of a Format or the numerical value if the Format is unknown.
-func (l Format) String() string {
-	name, ok := formatToName[l]
-	if !ok {
-		return strconv.Itoa(int(l))
-	}
-	return name
-}
-
-// NameToFormat returns the Format for the given name.
-func NameToFormat(name string) (Format, error) {
-	format, ok := nameToFormat[name]
-	if !ok {
-		return FormatJSON, fmt.Errorf("lion: no format for name: %s", name)
-	}
-	return format, nil
-}
 
 // GlobalHook is a function that handles a change in the global Logger instance.
 type GlobalHook func(Logger)
@@ -228,33 +125,125 @@ type Logger interface {
 	Print(args ...interface{})
 	Printf(format string, args ...interface{})
 	Println(args ...interface{})
+
+	// This generally should only be used internally or by sub-loggers such as the protobuf Logger.
+	LogEntryMessage(level Level, event *EntryMessage)
 }
 
-// EntryMessage is a serialized context or event in an Entry.
+// EntryMessage is a context or event in an Entry.
+// It has different meanings depending on what state it is in.
 type EntryMessage struct {
-	Format Format      `json:"format,omitempty"`
-	Name   string      `json:"name,omitempty"`
-	Value  interface{} `json:"value,omitempty"`
+	// Encoding specifies the encoding to use, if converting to an EncodedEntryMessage, such as "json", "protobuf", "thrift".
+	Encoding string `json:"encoding,omitempty"`
+	// Value is the unmarshalled value to use. It is expected that Value can be marshalled to JSON.
+	Value interface{} `json:"value,omitempty"`
 }
 
-// Entry is the a log entry.
+// Entry is a log entry.
 type Entry struct {
 	// ID may not be set depending on LoggerOptions.
 	// it is up to the user to determine if ID is required.
-	ID           string            `json:"id,omitempty"`
-	Level        Level             `json:"level,omitempty"`
-	Time         time.Time         `json:"time,omitempty"`
-	Contexts     []*EntryMessage   `json:"contexts,omitempty"`
-	Fields       map[string]string `json:"fields,omitempty"`
-	Event        *EntryMessage     `json:"event,omitempty"`
-	Message      string            `json:"message,omitempty"`
-	WriterOutput []byte            `json:"writer_output,omitempty"`
+	ID    string    `json:"id,omitempty"`
+	Level Level     `json:"level,omitempty"`
+	Time  time.Time `json:"time,omitempty"`
+	// both Contexts and Fields can be set
+	Contexts []*EntryMessage   `json:"contexts,omitempty"`
+	Fields   map[string]string `json:"fields,omitempty"`
+	// one of Event, Message, WriterOutput will be set
+	Event        *EntryMessage `json:"event,omitempty"`
+	Message      string        `json:"message,omitempty"`
+	WriterOutput []byte        `json:"writer_output,omitempty"`
+}
+
+// EncodedEntryMessage is an encoded EntryMessage.
+type EncodedEntryMessage struct {
+	// Encoding specifies the encoding, such as "json", "protobuf", "thrift".
+	Encoding string `json:"encoding,omitempty"`
+	// Name specifies the globally-unique name of the message type, such as "google.protobuf.Timestamp".
+	Name string `json:"name,omitempty"`
+	// Value is the encoded value.
+	Value []byte `json:"value,omitempty"`
+}
+
+// EncodedEntry is an encoded log entry.
+type EncodedEntry struct {
+	// ID may not be set depending on LoggerOptions.
+	// it is up to the user to determine if ID is required.
+	ID    string    `json:"id,omitempty"`
+	Level Level     `json:"level,omitempty"`
+	Time  time.Time `json:"time,omitempty"`
+	// both Contexts and Fields can be set
+	Contexts []*EncodedEntryMessage `json:"contexts,omitempty"`
+	Fields   map[string]string      `json:"fields,omitempty"`
+	// one of Event, Message, WriterOutput will be set
+	Event        *EncodedEntryMessage `json:"event,omitempty"`
+	Message      string               `json:"message,omitempty"`
+	WriterOutput []byte               `json:"writer_output,omitempty"`
+}
+
+// Encoder encodes EntryMessages.
+type Encoder interface {
+	Encode(entryMessage *EntryMessage) (*EncodedEntryMessage, error)
+	// Name just gets the globally-unique name for an EntryMessage.
+	Name(entryMessage *EntryMessage) (string, error)
+}
+
+// Decoder decodes EntryMessages.
+type Decoder interface {
+	Decode(encodedEntryMessage *EncodedEntryMessage) (*EntryMessage, error)
+}
+
+// EncoderDecoder is an Encoder and Decoarder.
+type EncoderDecoder interface {
+	Encoder
+	Decoder
+}
+
+// RegisterEncoderDecoder registers an EncoderDecoder by encoding.
+func RegisterEncoderDecoder(encoding string, encoderDecoder EncoderDecoder) error {
+	return registerEncoderDecoder(encoding, encoderDecoder)
+}
+
+// Encode encodes an EntryMessage.
+func (e *EntryMessage) Encode() (*EncodedEntryMessage, error) {
+	return encodeEntryMessage(e)
+}
+
+// Decode decodes an encoded EntryMessage.
+func (e *EncodedEntryMessage) Decode() (*EntryMessage, error) {
+	return decodeEncodedEntryMessage(e)
+}
+
+// Name gets the globally-unique name for an EntryMessge.
+func (e *EntryMessage) Name() (string, error) {
+	return entryMessageName(e)
+}
+
+// Encode encodes an Entry.
+func (e *Entry) Encode() (*EncodedEntry, error) {
+	return encodeEntry(e)
+}
+
+// Decode decodes an encoded Entry.
+func (e *EncodedEntry) Decode() (*Entry, error) {
+	return decodeEncodedEntry(e)
 }
 
 // Pusher is the interface used to push Entry objects to a persistent store.
 type Pusher interface {
 	Flusher
 	Push(entry *Entry) error
+}
+
+// EncodedPusher pushes EncodedEntry objects.
+type EncodedPusher interface {
+	Flusher
+	Push(encodedEntry *EncodedEntry) error
+}
+
+// EncodedPusherToPusher returns a Pusher for the EncodedPusher
+func EncodedPusherToPusher(encodedPusher EncodedPusher) Pusher {
+	return newEncodedPusherToPusherWrapper(encodedPusher)
 }
 
 // IDAllocator allocates unique IDs for Entry objects. The default
@@ -319,7 +308,7 @@ type Marshaller interface {
 
 // NewWritePusher constructs a new Pusher that writes to the given io.Writer.
 func NewWritePusher(writer io.Writer, marshaller Marshaller) Pusher {
-	return newWritePusher(writer, options...)
+	return newWritePusher(writer, marshaller)
 }
 
 // NewTextWritePusher constructs a new Pusher using a TextMarshaller.
@@ -330,32 +319,20 @@ func NewTextWritePusher(writer io.Writer, textMarshallerOptions ...TextMarshalle
 	)
 }
 
-// Puller pulls Entry objects from a persistent store.
+// Puller pulls EncodedEntry objects from a persistent store.
 type Puller interface {
-	Pull() (*Entry, error)
+	Pull() (*EncodedEntry, error)
 }
 
-// Unmarshaller unmarshalls a marshalled Entry object. At the end
+// Unmarshaller unmarshalls a marshalled EncodedEntry object. At the end
 // of a stream, Unmarshaller will return io.EOF.
 type Unmarshaller interface {
-	Unmarshal(reader io.Reader, entry *Entry) error
-}
-
-// ReadPullerOption is an option for a read Puller.
-type ReadPullerOption func(*readPuller)
-
-// ReadPullerWithUnmarshaller uses the Unmarshaller for the read Puller.
-//
-// By default, DelimitedUnmarshaller is used.
-func ReadPullerWithUnmarshaller(unmarshaller Unmarshaller) ReadPullerOption {
-	return func(readPuller *readPuller) {
-		readPuller.unmarshaller = unmarshaller
-	}
+	Unmarshal(reader io.Reader, encodedtry *EncodedEntry) error
 }
 
 // NewReadPuller constructs a new Puller that reads from the given Reader.
-func NewReadPuller(reader io.Reader, options ...ReadPullerOption) Puller {
-	return newReadPuller(reader, options...)
+func NewReadPuller(reader io.Reader, unmarshaller Unmarshaller) Puller {
+	return newReadPuller(reader, unmarshaller)
 }
 
 // TextMarshaller is a Marshaller used for text.

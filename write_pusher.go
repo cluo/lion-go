@@ -15,19 +15,14 @@ var (
 type writePusher struct {
 	writer     io.Writer
 	marshaller Marshaller
-	newline    bool
 	lock       *sync.Mutex
 }
 
-func newWritePusher(writer io.Writer, options ...WritePusherOption) *writePusher {
+func newWritePusher(writer io.Writer, marshaller Marshaller) *writePusher {
 	writePusher := &writePusher{
 		writer,
-		DelimitedMarshaller,
-		false,
+		marshaller,
 		&sync.Mutex{},
-	}
-	for _, option := range options {
-		option(writePusher)
 	}
 	if file, ok := writer.(*os.File); ok {
 		if textMarshaller, ok := writePusher.marshaller.(TextMarshaller); ok {
