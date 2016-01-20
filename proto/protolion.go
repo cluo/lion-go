@@ -45,8 +45,6 @@ type Logger interface {
 	lion.Logger
 
 	WithProtoContext(context proto.Message) Logger
-	WithProtoField(key string, value interface{}) Logger
-	WithProtoFields(fields map[string]interface{}) Logger
 
 	ProtoDebug(event proto.Message)
 	ProtoInfo(event proto.Message)

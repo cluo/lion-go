@@ -129,8 +129,8 @@ func testPrintSomeStuff(t *testing.T, logger protolion.Logger) {
 	writer = logger.Writer()
 	_, _ = writer.Write([]byte("none"))
 	logger.Infoln("a normal line")
-	logger.WithProtoField("someKey", "someValue").WithProtoField("someOtherKey", 1).Warnln("a warning line")
-	logger.WithProtoField("someKey", "someValue").WithProtoField("someOtherKey", 1).ProtoInfo(
+	logger.WithField("someKey", "someValue").WithField("someOtherKey", 1).Warnln("a warning line")
+	protolion.NewLogger(logger.WithField("someKey", "someValue").WithField("someOtherKey", 1)).ProtoInfo(
 		&Baz{
 			Bat: &Baz_Bat{
 				Ban: &Baz_Bat_Ban{
