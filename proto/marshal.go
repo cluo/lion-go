@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"reflect"
 
 	"go.pedge.io/lion"
 	"go.pedge.io/pb/go/google/protobuf"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/matttproud/golang_protobuf_extensions/protoutil"
+	"github.com/matttproud/golang_protobuf_extensions/pbutil"
 )
 
 var (
@@ -46,7 +44,7 @@ func (m *delimitedMarshaller) Marshal(entry *lion.Entry) ([]byte, error) {
 		return nil, err
 	}
 	buffer := bytes.NewBuffer(nil)
-	if _, err := protoutil.WriteDelimited(buffer, protoEntry); err != nil {
+	if _, err := pbutil.WriteDelimited(buffer, protoEntry); err != nil {
 		return nil, err
 	}
 	return buffer.Bytes(), nil
@@ -56,18 +54,18 @@ type delimitedUnmarshaller struct{}
 
 func (u *delimitedUnmarshaller) Unmarshal(reader io.Reader, encodedEntry *lion.EncodedEntry) error {
 	protoEntry := &Entry{}
-	if _, err := protoutil.ReadDelimited(reader, protoEntry); err != nil {
+	if _, err := pbutil.ReadDelimited(reader, protoEntry); err != nil {
 		return err
 	}
 	iEntry, err := protoEntryToEncodedEntry(protoEntry)
 	if err != nil {
 		return err
 	}
-	*entry = *iEntry
+	*encodedEntry = *iEntry
 	return nil
 }
 
-func encodedEntryToProtoEntry(encodedEntry *lion.Entry) (*Entry, error) {
+func encodedEntryToProtoEntry(encodedEntry *lion.EncodedEntry) (*Entry, error) {
 	contexts, err := messagesToEntryMessages(encodedEntry.Contexts)
 	if err != nil {
 		return nil, err
@@ -76,19 +74,19 @@ func encodedEntryToProtoEntry(encodedEntry *lion.Entry) (*Entry, error) {
 	if err != nil {
 		return nil, err
 	}
-	protoLevel, ok := levelToProto[entry.Level]
+	protoLevel, ok := levelToProto[encodedEntry.Level]
 	if !ok {
-		return nil, fmt.Errorf("lion: unknown level: %v", entry.Level)
+		return nil, fmt.Errorf("lion: unknown level: %v", encodedEntry.Level)
 	}
 	return &Entry{
-		Id:           entry.ID,
+		Id:           encodedEntry.ID,
 		Level:        protoLevel,
-		Timestamp:    google_protobuf.TimeToProto(entry.Time),
+		Timestamp:    google_protobuf.TimeToProto(encodedEntry.Time),
 		Context:      contexts,
-		Fields:       entry.Fields,
+		Fields:       encodedEntry.Fields,
 		Event:        event,
-		Message:      entry.Message,
-		WriterOutput: entry.WriterOutput,
+		Message:      encodedEntry.Message,
+		WriterOutput: encodedEntry.WriterOutput,
 	}, nil
 }
 
@@ -171,20 +169,4 @@ func entryMessagesToMessages(entryMessages []*Entry_Message) ([]*lion.EncodedEnt
 		messages[i] = message
 	}
 	return messages, nil
-}
-
-func newMessage(name string) (proto.Message, error) {
-	reflectType := proto.MessageType(name)
-	if reflectType == nil {
-		return nil, fmt.Errorf("lion: no Message registered for name: %s", name)
-	}
-
-	return reflect.New(reflectType.Elem()).Interface().(proto.Message), nil
-}
-
-func messageName(message proto.Message) string {
-	if message == nil {
-		return ""
-	}
-	return proto.MessageName(message)
 }
