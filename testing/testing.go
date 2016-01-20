@@ -1,4 +1,4 @@
 /*
-Package testing defines testing for lion.
+Package testinglion defines testing for lion.
 */
-package testing // import "go.pedge.io/lion/testing"
+package testinglion // import "go.pedge.io/lion/testing"

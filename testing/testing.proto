@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package lion.testing;
 
-option go_package = "testing";
+option go_package = "testinglion";
 
 message Foo {
   string one = 1;

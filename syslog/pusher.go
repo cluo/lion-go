@@ -1,4 +1,4 @@
-package lion_syslog
+package sysloglion
 
 import (
 	"log/syslog"

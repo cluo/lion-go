@@ -1,4 +1,4 @@
-package lion_gcloud_test
+package gcloudlion_test
 
 import (
 	"os"
@@ -25,7 +25,7 @@ func Example() error {
 		return err
 	}
 	logger := lion.NewLogger(
-		lion_gcloud.NewPusher(
+		gcloudlion.NewPusher(
 			service.Projects.Logs.Entries,
 			projectID,
 			logName,

@@ -1,4 +1,4 @@
-package lion_gcloud
+package gcloudlion
 
 import (
 	"time"

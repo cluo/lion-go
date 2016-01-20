@@ -1,3 +1,6 @@
+/*
+Package protolion defines the Protocol Buffers functionality for lion.
+*/
 package protolion // import "go.pedge.io/lion/proto"
 
 import (

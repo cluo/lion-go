@@ -1,7 +1,7 @@
 /*
-Package lion_syslog defines functionality for integration with syslog.
+Package sysloglion defines functionality for integration with syslog.
 */
-package lion_syslog // import "go.pedge.io/lion/syslog"
+package sysloglion // import "go.pedge.io/lion/syslog"
 
 import (
 	"log/syslog"
