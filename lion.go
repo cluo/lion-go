@@ -1,5 +1,5 @@
 /*
-Package lion defines the main lion functionality.
+Package lion defines the main lion logging functionality.
 */
 package lion // import "go.pedge.io/lion"
 
@@ -126,6 +126,8 @@ type Logger interface {
 	Printf(format string, args ...interface{})
 	Println(args ...interface{})
 
+	// This generally should only be used internally or by sub-loggers such as the protobuf Logger.
+	WithEntryMessageContext(context *EntryMessage) Logger
 	// This generally should only be used internally or by sub-loggers such as the protobuf Logger.
 	LogEntryMessage(level Level, event *EntryMessage)
 }

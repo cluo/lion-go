@@ -8,10 +8,6 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-func init() {
-	lion.RegisterEncoderDecoder(Encoding, newEncoderDecoder())
-}
-
 type encoderDecoder struct{}
 
 func newEncoderDecoder() *encoderDecoder {

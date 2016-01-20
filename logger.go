@@ -51,7 +51,7 @@ func (l *logger) AtLevel(level Level) Logger {
 	}
 }
 
-func (l *logger) WithContext(context *EntryMessage) Logger {
+func (l *logger) WithEntryMessageContext(context *EntryMessage) Logger {
 	return &logger{
 		l.pusher,
 		l.enableID,

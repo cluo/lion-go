@@ -1,6 +1,11 @@
 package protolion // import "go.pedge.io/lion/proto"
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/gogo/protobuf/proto"
+	"go.pedge.io/lion"
+)
 
 var (
 	// Encoding is the name of the encoding.
@@ -14,8 +19,20 @@ var (
 	globalPrimaryPackage     = "golang"
 	globalSecondaryPackage   = "gogo"
 	globalOnlyPrimaryPackage = true
+	globalLogger             = NewLogger(lion.GlobalLogger())
 	globalLock               = &sync.Mutex{}
 )
+
+func init() {
+	lion.RegisterEncoderDecoder(Encoding, newEncoderDecoder())
+	lion.AddGlobalHook(setGlobalLogger)
+}
+
+func setGlobalLogger(logger lion.Logger) {
+	globalLock.Lock()
+	defer globalLock.Unlock()
+	globalLogger = NewLogger(logger)
+}
 
 // GolangFirst says to check both golang and gogo for message names and types, but golang first.
 func GolangFirst() {
@@ -51,4 +68,24 @@ func GogoOnly() {
 	globalPrimaryPackage = "gogo"
 	globalSecondaryPackage = "golang"
 	globalOnlyPrimaryPackage = true
+}
+
+// Logger is a lion.Logger that also has proto logging methods.
+type Logger interface {
+	lion.Logger
+
+	WithProtoContext(context proto.Message) Logger
+
+	ProtoDebug(event proto.Message)
+	ProtoInfo(event proto.Message)
+	ProtoWarn(event proto.Message)
+	ProtoError(event proto.Message)
+	ProtoFatal(event proto.Message)
+	ProtoPanic(event proto.Message)
+	ProtoPrint(event proto.Message)
+}
+
+// NewLogger returns a new Logger.
+func NewLogger(delegate lion.Logger) Logger {
+	return newLogger(delegate)
 }
