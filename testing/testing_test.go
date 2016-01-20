@@ -1,4 +1,4 @@
-package lion_testing
+package testing
 
 import (
 	"bytes"

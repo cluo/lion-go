@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package lion.testing;
 
+option go_package = "testing";
+
 message Foo {
   string one = 1;
   int32 two = 2;
