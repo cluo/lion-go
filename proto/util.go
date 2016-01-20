@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 
-	gogo "github.com/gogo/protobuf/proto"
 	golang "github.com/golang/protobuf/proto"
 )
 
@@ -40,8 +39,8 @@ func messageTypeForPackage(pkg string, name string) (reflect.Type, error) {
 	switch pkg {
 	case "golang":
 		return golang.MessageType(name), nil
-	case "gogo":
-		return gogo.MessageType(name), nil
+	//case "gogo":
+	//return gogo.MessageType(name), nil
 	default:
 		return nil, fmt.Errorf("lion: unknown package: %s", pkg)
 	}
@@ -71,8 +70,8 @@ func messageNameForPackage(pkg string, message golang.Message) (string, error) {
 	switch pkg {
 	case "golang":
 		return golang.MessageName(message), nil
-	case "gogo":
-		return gogo.MessageName(message), nil
+	//case "gogo":
+	//return gogo.MessageName(message), nil
 	default:
 		return "", fmt.Errorf("lion: unknown package: %s", pkg)
 	}

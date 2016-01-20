@@ -1,8 +1,9 @@
 package protolion
 
 import (
-	"github.com/gogo/protobuf/proto"
 	"go.pedge.io/lion"
+
+	"github.com/golang/protobuf/proto"
 )
 
 type logger struct {
@@ -15,6 +16,14 @@ func newLogger(delegate lion.Logger) *logger {
 
 func (l *logger) WithProtoContext(context proto.Message) Logger {
 	return newLogger(l.WithEntryMessageContext(newEntryMessage(context)))
+}
+
+func (l *logger) WithProtoField(key string, value interface{}) Logger {
+	return newLogger(l.WithField(key, value))
+}
+
+func (l *logger) WithProtoFields(fields map[string]interface{}) Logger {
+	return newLogger(l.WithFields(fields))
 }
 
 func (l *logger) ProtoDebug(event proto.Message) {

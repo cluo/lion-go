@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"go.pedge.io/lion"
+	"go.pedge.io/lion/proto"
 
 	"github.com/stretchr/testify/require"
 )
@@ -16,20 +17,23 @@ import (
 func TestRoundtripAndTextMarshaller(t *testing.T) {
 	buffer := bytes.NewBuffer(nil)
 	fakeTimer := newFakeTimer(0)
-	logger := lion.NewLogger(
-		lion.NewWritePusher(
-			buffer,
-		),
-		lion.LoggerWithIDAllocator(newFakeIDAllocator()),
-		lion.LoggerWithTimer(fakeTimer),
-	).AtLevel(lion.LevelDebug)
-	logger.Debug(
+	logger := protolion.NewLogger(
+		lion.NewLogger(
+			lion.NewWritePusher(
+				buffer,
+				protolion.DelimitedMarshaller,
+			),
+			lion.LoggerWithIDAllocator(newFakeIDAllocator()),
+			lion.LoggerWithTimer(fakeTimer),
+		).AtLevel(lion.LevelDebug),
+	)
+	logger.ProtoDebug(
 		&Foo{
 			StringField: "one",
 			Int32Field:  2,
 		},
 	)
-	logger.Info(
+	logger.ProtoInfo(
 		&Baz{
 			Bat: &Baz_Bat{
 				Ban: &Baz_Bat_Ban{
@@ -39,7 +43,7 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 			},
 		},
 	)
-	logger.Info(&Empty{})
+	logger.ProtoInfo(&Empty{})
 	writer := logger.InfoWriter()
 	for _, s := range []string{
 		"hello",
@@ -58,14 +62,17 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 
 	puller := lion.NewReadPuller(
 		buffer,
+		protolion.DelimitedUnmarshaller,
 	)
 	writeBuffer := bytes.NewBuffer(nil)
 	writePusher := lion.NewTextWritePusher(
 		writeBuffer,
 		lion.TextMarshallerDisableTime(),
 	)
-	for entry, pullErr := puller.Pull(); pullErr != io.EOF; entry, pullErr = puller.Pull() {
+	for encodedEntry, pullErr := puller.Pull(); pullErr != io.EOF; encodedEntry, pullErr = puller.Pull() {
 		require.NoError(t, pullErr)
+		entry, err := encodedEntry.Decode()
+		require.NoError(t, err)
 		require.NoError(t, writePusher.Push(entry))
 	}
 	require.Equal(
@@ -88,17 +95,17 @@ WARN  a warning line {"someKey":"someValue"}
 }
 
 func TestPrintSomeStuff(t *testing.T) {
-	testPrintSomeStuff(t, lion.DefaultLogger)
+	testPrintSomeStuff(t, protolion.NewLogger(lion.DefaultLogger))
 }
 
-func testPrintSomeStuff(t *testing.T, logger lion.Logger) {
-	logger.Debug(
+func testPrintSomeStuff(t *testing.T, logger protolion.Logger) {
+	logger.ProtoDebug(
 		&Foo{
 			StringField: "one",
 			Int32Field:  2,
 		},
 	)
-	logger.Info(
+	logger.ProtoInfo(
 		&Baz{
 			Bat: &Baz_Bat{
 				Ban: &Baz_Bat_Ban{
@@ -122,8 +129,8 @@ func testPrintSomeStuff(t *testing.T, logger lion.Logger) {
 	writer = logger.Writer()
 	_, _ = writer.Write([]byte("none"))
 	logger.Infoln("a normal line")
-	logger.WithField("someKey", "someValue").WithField("someOtherKey", 1).Warnln("a warning line")
-	logger.WithField("someKey", "someValue").WithField("someOtherKey", 1).Info(
+	logger.WithProtoField("someKey", "someValue").WithProtoField("someOtherKey", 1).Warnln("a warning line")
+	logger.WithProtoField("someKey", "someValue").WithProtoField("someOtherKey", 1).ProtoInfo(
 		&Baz{
 			Bat: &Baz_Bat{
 				Ban: &Baz_Bat_Ban{

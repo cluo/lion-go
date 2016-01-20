@@ -92,6 +92,9 @@ func checkNoRegisteredEncoding(encoding string) error {
 /// *** util ***
 
 func encodeEntry(entry *Entry) (*EncodedEntry, error) {
+	if entry == nil {
+		return nil, nil
+	}
 	encodedContexts, err := encodeEntryMessages(entry.Contexts)
 	if err != nil {
 		return nil, err
@@ -113,6 +116,9 @@ func encodeEntry(entry *Entry) (*EncodedEntry, error) {
 }
 
 func encodeEntryMessages(entryMessages []*EntryMessage) ([]*EncodedEntryMessage, error) {
+	if entryMessages == nil {
+		return nil, nil
+	}
 	encodedEntryMessages := make([]*EncodedEntryMessage, len(entryMessages))
 	for i, entryMessage := range entryMessages {
 		encodedEntryMessage, err := encodeEntryMessage(entryMessage)
@@ -125,6 +131,9 @@ func encodeEntryMessages(entryMessages []*EntryMessage) ([]*EncodedEntryMessage,
 }
 
 func encodeEntryMessage(entryMessage *EntryMessage) (*EncodedEntryMessage, error) {
+	if entryMessage == nil {
+		return nil, nil
+	}
 	encoder, err := getEncoder(entryMessage.Encoding)
 	if err != nil {
 		return nil, err
@@ -133,6 +142,9 @@ func encodeEntryMessage(entryMessage *EntryMessage) (*EncodedEntryMessage, error
 }
 
 func decodeEncodedEntry(encodedEntry *EncodedEntry) (*Entry, error) {
+	if encodedEntry == nil {
+		return nil, nil
+	}
 	contexts, err := decodeEncodedEntryMessages(encodedEntry.Contexts)
 	if err != nil {
 		return nil, err
@@ -154,6 +166,9 @@ func decodeEncodedEntry(encodedEntry *EncodedEntry) (*Entry, error) {
 }
 
 func decodeEncodedEntryMessages(encodedEntryMessages []*EncodedEntryMessage) ([]*EntryMessage, error) {
+	if encodedEntryMessages == nil {
+		return nil, nil
+	}
 	entryMessages := make([]*EntryMessage, len(encodedEntryMessages))
 	for i, encodedEntryMessage := range encodedEntryMessages {
 		entryMessage, err := decodeEncodedEntryMessage(encodedEntryMessage)
@@ -166,6 +181,9 @@ func decodeEncodedEntryMessages(encodedEntryMessages []*EncodedEntryMessage) ([]
 }
 
 func decodeEncodedEntryMessage(encodedEntryMessage *EncodedEntryMessage) (*EntryMessage, error) {
+	if encodedEntryMessage == nil {
+		return nil, nil
+	}
 	decoder, err := getDecoder(encodedEntryMessage.Encoding)
 	if err != nil {
 		return nil, err
@@ -174,6 +192,9 @@ func decodeEncodedEntryMessage(encodedEntryMessage *EncodedEntryMessage) (*Entry
 }
 
 func entryMessageName(entryMessage *EntryMessage) (string, error) {
+	if entryMessage == nil {
+		return "", nil
+	}
 	encoder, err := getEncoder(entryMessage.Encoding)
 	if err != nil {
 		return "", err
