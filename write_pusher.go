@@ -12,6 +12,10 @@ var (
 	newlineBytes = []byte{'\n'}
 )
 
+type syncer interface {
+	Sync() error
+}
+
 type writePusher struct {
 	writer     io.Writer
 	marshaller Marshaller
@@ -34,18 +38,10 @@ func newWritePusher(writer io.Writer, marshaller Marshaller) *writePusher {
 	return writePusher
 }
 
-type flusher interface {
-	Flush() error
-}
-
-type syncer interface {
-	Sync() error
-}
-
 func (w *writePusher) Flush() error {
 	if syncer, ok := w.writer.(syncer); ok {
 		return syncer.Sync()
-	} else if flusher, ok := w.writer.(flusher); ok {
+	} else if flusher, ok := w.writer.(Flusher); ok {
 		return flusher.Flush()
 	}
 	return nil
