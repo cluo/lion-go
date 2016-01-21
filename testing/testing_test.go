@@ -140,6 +140,7 @@ func testPrintSomeStuff(t *testing.T, logger protolion.Logger) {
 			},
 		},
 	)
+	logger.WithField("someKey", "someValue").WithField("someOtherKey", 1).Print()
 }
 
 type fakeIDAllocator struct {

@@ -151,7 +151,7 @@ type Entry struct {
 	// both Contexts and Fields can be set
 	Contexts []*EntryMessage   `json:"contexts,omitempty"`
 	Fields   map[string]string `json:"fields,omitempty"`
-	// one of Event, Message, WriterOutput will be set
+	// zero or one of Event, Message, WriterOutput will be set
 	Event        *EntryMessage `json:"event,omitempty"`
 	Message      string        `json:"message,omitempty"`
 	WriterOutput []byte        `json:"writer_output,omitempty"`
@@ -177,7 +177,7 @@ type EncodedEntry struct {
 	// both Contexts and Fields can be set
 	Contexts []*EncodedEntryMessage `json:"contexts,omitempty"`
 	Fields   map[string]string      `json:"fields,omitempty"`
-	// one of Event, Message, WriterOutput will be set
+	// zero or one of Event, Message, WriterOutput will be set
 	Event        *EncodedEntryMessage `json:"event,omitempty"`
 	Message      string               `json:"message,omitempty"`
 	WriterOutput []byte               `json:"writer_output,omitempty"`

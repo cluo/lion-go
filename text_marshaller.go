@@ -104,20 +104,27 @@ func textMarshalEntry(
 			_ = buffer.WriteByte(' ')
 		}
 	}
+	eventSeen := false
 	// TODO(pedge): verify only one of Event, Message, WriterOutput?
 	if entry.Event != nil {
+		eventSeen = true
 		if err := textMarshalMessage(buffer, entry.Event); err != nil {
 			return nil, err
 		}
 	}
 	if entry.Message != "" {
+		eventSeen = true
 		_, _ = buffer.WriteString(entry.Message)
 	}
 	if entry.WriterOutput != nil {
+		eventSeen = true
 		_, _ = buffer.Write(trimRightSpaceBytes(entry.WriterOutput))
 	}
 	if len(entry.Contexts) > 0 && !disableContexts {
-		_ = buffer.WriteByte(' ')
+		if eventSeen {
+			_ = buffer.WriteByte(' ')
+		}
+		eventSeen = true
 		lenContexts := len(entry.Contexts)
 		for i, context := range entry.Contexts {
 			if err := textMarshalMessage(buffer, context); err != nil {
@@ -129,7 +136,9 @@ func textMarshalEntry(
 		}
 	}
 	if len(entry.Fields) > 0 && !disableContexts {
-		_ = buffer.WriteByte(' ')
+		if eventSeen {
+			_ = buffer.WriteByte(' ')
+		}
 		data, err := json.Marshal(entry.Fields)
 		if err != nil {
 			return nil, err
