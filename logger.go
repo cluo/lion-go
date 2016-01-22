@@ -216,6 +216,22 @@ func (l *logger) LogEntryMessage(level Level, event *EntryMessage) {
 	l.print(level, event, "", nil)
 }
 
+func (l *logger) Kit() KitLogger {
+	return l
+}
+
+func (l *logger) Log(keyvals ...interface{}) error {
+	if len(keyvals)%2 != 0 {
+		keyvals = append(keyvals, "MISSING")
+	}
+	fields := make(map[string]interface{}, len(keyvals)/2)
+	for i := 0; i < len(keyvals); i += 2 {
+		fields[fmt.Sprintf("%v", keyvals[i])] = keyvals[i+1]
+	}
+	l.WithFields(fields).Println()
+	return nil
+}
+
 func (l *logger) print(level Level, event *EntryMessage, message string, writerOutput []byte) {
 	if err := l.printWithError(level, event, message, writerOutput); err != nil {
 		l.errorHandler.Handle(err)
