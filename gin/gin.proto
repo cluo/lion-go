@@ -10,11 +10,10 @@ message Call {
   string method = 1;
   string path = 2;
   map<string, string> query = 3;
-  map<string, string> request_header = 4;
+  string user_agent = 4;
   map<string, string> request_form = 5;
-  map<string, string> response_header = 6;
-  string client_ip = 7;
-  uint32 status_code = 8;
-  string duration = 9;
-  repeated string error = 10;
+  string client_ip = 6;
+  uint32 status_code = 7;
+  string duration = 8;
+  repeated string error = 9;
 }

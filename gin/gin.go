@@ -65,19 +65,18 @@ func LoggerAndRecovery(protoLoggerProvider func() protolion.Logger) gin.HandlerF
 		}
 		defer func() {
 			call := &Call{
-				Method:         c.Request.Method,
-				Path:           path,
-				RequestHeader:  valuesMap(c.Request.Header),
-				RequestForm:    valuesMap(c.Request.Form),
-				ResponseHeader: valuesMap(c.Writer.Header()),
-				ClientIp:       c.ClientIP(),
-				StatusCode:     uint32(statusCode(c.Writer.Status())),
-				Error:          c.Errors.Errors(),
+				Method:      c.Request.Method,
+				Path:        path,
+				UserAgent:   c.Request.Header.Get("User-Agent"),
+				RequestForm: valuesMap(c.Request.Form),
+				ClientIp:    c.ClientIP(),
+				StatusCode:  uint32(statusCode(c.Writer.Status())),
+				Error:       c.Errors.Errors(),
 			}
 			if c.Request.URL != nil {
 				call.Query = valuesMap(c.Request.URL.Query())
 			}
-			call.Duration = fmt.Sprintf("%13v", time.Since(start))
+			call.Duration = fmt.Sprintf("%v", time.Since(start))
 			protoLogger := protoLoggerProvider()
 			if recoverErr := recover(); recoverErr != nil {
 				stack := stack(3)
