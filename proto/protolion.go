@@ -4,6 +4,7 @@ Package protolion defines the Protocol Buffers functionality for lion.
 package protolion // import "go.pedge.io/lion/proto"
 
 import (
+	"io"
 	"sync"
 
 	"go.pedge.io/lion"
@@ -70,6 +71,121 @@ func NewLogger(delegate lion.Logger) Logger {
 	return newLogger(delegate)
 }
 
+// Flush calls Flush on the global Logger.
+func Flush() error {
+	return globalLogger.Flush()
+}
+
+// DebugWriter calls DebugWriter on the global Logger.
+func DebugWriter() io.Writer {
+	return globalLogger.DebugWriter()
+}
+
+// InfoWriter calls InfoWriter on the global Logger.
+func InfoWriter() io.Writer {
+	return globalLogger.InfoWriter()
+}
+
+// WarnWriter calls WarnWriter on the global Logger.
+func WarnWriter() io.Writer {
+	return globalLogger.WarnWriter()
+}
+
+// ErrorWriter calls ErrorWriter on the global Logger.
+func ErrorWriter() io.Writer {
+	return globalLogger.ErrorWriter()
+}
+
+// Writer calls Writer on the global Logger.
+func Writer() io.Writer {
+	return globalLogger.Writer()
+}
+
+// Debugf calls Debugf on the global Logger.
+func Debugf(format string, args ...interface{}) {
+	globalLogger.Debugf(format, args...)
+}
+
+// Debugln calls Debugln on the global Logger.
+func Debugln(args ...interface{}) {
+	globalLogger.Debugln(args...)
+}
+
+// Infof calls Infof on the global Logger.
+func Infof(format string, args ...interface{}) {
+	globalLogger.Infof(format, args...)
+}
+
+// Infoln calls Infoln on the global Logger.
+func Infoln(args ...interface{}) {
+	globalLogger.Infoln(args...)
+}
+
+// Warnf calls Warnf on the global Logger.
+func Warnf(format string, args ...interface{}) {
+	globalLogger.Warnf(format, args...)
+}
+
+// Warnln calls Warnln on the global Logger.
+func Warnln(args ...interface{}) {
+	globalLogger.Warnln(args...)
+}
+
+// Errorf calls Errorf on the global Logger.
+func Errorf(format string, args ...interface{}) {
+	globalLogger.Errorf(format, args...)
+}
+
+// Errorln calls Errorln on the global Logger.
+func Errorln(args ...interface{}) {
+	globalLogger.Errorln(args...)
+}
+
+// Fatalf calls Fatalf on the global Logger.
+func Fatalf(format string, args ...interface{}) {
+	globalLogger.Fatalf(format, args...)
+}
+
+// Fatalln calls Fatalln on the global Logger.
+func Fatalln(args ...interface{}) {
+	globalLogger.Fatalln(args...)
+}
+
+// Panicf calls Panicf on the global Logger.
+func Panicf(format string, args ...interface{}) {
+	globalLogger.Panicf(format, args...)
+}
+
+// Panicln calls Panicln on the global Logger.
+func Panicln(args ...interface{}) {
+	globalLogger.Panicln(args...)
+}
+
+// Printf calls Printf on the global Logger.
+func Printf(format string, args ...interface{}) {
+	globalLogger.Printf(format, args...)
+}
+
+// Println calls Println on the global Logger.
+func Println(args ...interface{}) {
+	globalLogger.Println(args...)
+}
+
+// AtLevel calls AtLevel on the global Logger.
+func AtLevel(level lion.Level) Logger {
+	return globalLogger.AtLevel(level)
+}
+
+// WithField calls WithField on the global Logger.
+func WithField(key string, value interface{}) Logger {
+	return globalLogger.WithField(key, value)
+}
+
+// WithFields calls WithFields on the global Logger.
+func WithFields(fields map[string]interface{}) Logger {
+	return globalLogger.WithFields(fields)
+}
+
 // WithContext calls WithContext on the global Logger.
 func WithContext(context proto.Message) Logger {
 	return globalLogger.WithContext(context)
@@ -108,6 +224,11 @@ func Panic(event proto.Message) {
 // Print calls Print on the global Logger.
 func Print(event proto.Message) {
 	globalLogger.Print(event)
+}
+
+// LionLogger calls LionLogger on the global Logger.
+func LionLogger() lion.Logger {
+	return globalLogger.LionLogger()
 }
 
 //// GolangFirst says to check both golang and gogo for message names and types, but golang first.
