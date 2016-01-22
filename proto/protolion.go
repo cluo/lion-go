@@ -42,17 +42,22 @@ func setGlobalLogger(logger lion.Logger) {
 
 // Logger is a lion.Logger that also has proto logging methods.
 type Logger interface {
-	lion.Logger
+	lion.BaseLogger
 
-	WithProtoContext(context proto.Message) Logger
+	AtLevel(level lion.Level) Logger
+	WithField(key string, value interface{}) Logger
+	WithFields(fields map[string]interface{}) Logger
 
-	ProtoDebug(event proto.Message)
-	ProtoInfo(event proto.Message)
-	ProtoWarn(event proto.Message)
-	ProtoError(event proto.Message)
-	ProtoFatal(event proto.Message)
-	ProtoPanic(event proto.Message)
-	ProtoPrint(event proto.Message)
+	WithContext(context proto.Message) Logger
+	Debug(event proto.Message)
+	Info(event proto.Message)
+	Warn(event proto.Message)
+	Error(event proto.Message)
+	Fatal(event proto.Message)
+	Panic(event proto.Message)
+	Print(event proto.Message)
+
+	LionLogger() lion.Logger
 }
 
 // GlobalLogger returns the global Logger instance.
@@ -65,44 +70,44 @@ func NewLogger(delegate lion.Logger) Logger {
 	return newLogger(delegate)
 }
 
-// WithContext calls WithProtoContext on the global Logger.
+// WithContext calls WithContext on the global Logger.
 func WithContext(context proto.Message) Logger {
-	return globalLogger.WithProtoContext(context)
+	return globalLogger.WithContext(context)
 }
 
-// Debug calls ProtoDebug on the global Logger.
+// Debug calls Debug on the global Logger.
 func Debug(event proto.Message) {
-	globalLogger.ProtoDebug(event)
+	globalLogger.Debug(event)
 }
 
-// Info calls ProtoInfo on the global Logger.
+// Info calls Info on the global Logger.
 func Info(event proto.Message) {
-	globalLogger.ProtoInfo(event)
+	globalLogger.Info(event)
 }
 
-// Warn calls ProtoWarn on the global Logger.
+// Warn calls Warn on the global Logger.
 func Warn(event proto.Message) {
-	globalLogger.ProtoWarn(event)
+	globalLogger.Warn(event)
 }
 
-// Error calls ProtoError on the global Logger.
+// Error calls Error on the global Logger.
 func Error(event proto.Message) {
-	globalLogger.ProtoError(event)
+	globalLogger.Error(event)
 }
 
-// Fatal calls ProtoFatal on the global Logger.
+// Fatal calls Fatal on the global Logger.
 func Fatal(event proto.Message) {
-	globalLogger.ProtoFatal(event)
+	globalLogger.Fatal(event)
 }
 
-// Panic calls ProtoPanic on the global Logger.
+// Panic calls Panic on the global Logger.
 func Panic(event proto.Message) {
-	globalLogger.ProtoPanic(event)
+	globalLogger.Panic(event)
 }
 
-// Print calls ProtoPrint on the global Logger.
+// Print calls Print on the global Logger.
 func Print(event proto.Message) {
-	globalLogger.ProtoPrint(event)
+	globalLogger.Print(event)
 }
 
 //// GolangFirst says to check both golang and gogo for message names and types, but golang first.

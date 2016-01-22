@@ -89,42 +89,40 @@ type Flusher interface {
 	Flush() error
 }
 
-// Logger is the main logging interface. All methods are also replicated
-// on the package and attached to a global Logger.
-type Logger interface {
+// BaseLogger is a Logger without the methods that are self-returning.
+//
+// This is so sub-packages can implement these.
+type BaseLogger interface {
 	Flusher
-
-	AtLevel(level Level) Logger
-
 	DebugWriter() io.Writer
 	InfoWriter() io.Writer
 	WarnWriter() io.Writer
 	ErrorWriter() io.Writer
 	Writer() io.Writer
-
-	WithField(key string, value interface{}) Logger
-	WithFields(fields map[string]interface{}) Logger
-	Debug(args ...interface{})
 	Debugf(format string, args ...interface{})
 	Debugln(args ...interface{})
-	Info(args ...interface{})
 	Infof(format string, args ...interface{})
 	Infoln(args ...interface{})
-	Warn(args ...interface{})
 	Warnf(format string, args ...interface{})
 	Warnln(args ...interface{})
-	Error(args ...interface{})
 	Errorf(format string, args ...interface{})
 	Errorln(args ...interface{})
-	Fatal(args ...interface{})
 	Fatalf(format string, args ...interface{})
 	Fatalln(args ...interface{})
-	Panic(args ...interface{})
 	Panicf(format string, args ...interface{})
 	Panicln(args ...interface{})
-	Print(args ...interface{})
 	Printf(format string, args ...interface{})
 	Println(args ...interface{})
+}
+
+// Logger is the main logging interface. All methods are also replicated
+// on the package and attached to a global Logger.
+type Logger interface {
+	BaseLogger
+
+	AtLevel(level Level) Logger
+	WithField(key string, value interface{}) Logger
+	WithFields(fields map[string]interface{}) Logger
 
 	// This generally should only be used internally or by sub-loggers such as the protobuf Logger.
 	WithEntryMessageContext(context *EntryMessage) Logger
@@ -391,11 +389,6 @@ func Flush() error {
 	return globalLogger.Flush()
 }
 
-// AtLevel calls AtLevel on the global Logger.
-func AtLevel(level Level) Logger {
-	return globalLogger.AtLevel(level)
-}
-
 // DebugWriter calls DebugWriter on the global Logger.
 func DebugWriter() io.Writer {
 	return globalLogger.DebugWriter()
@@ -421,21 +414,6 @@ func Writer() io.Writer {
 	return globalLogger.Writer()
 }
 
-// WithField calls WithField on the global Logger.
-func WithField(key string, value interface{}) Logger {
-	return globalLogger.WithField(key, value)
-}
-
-// WithFields calls WithFields on the global Logger.
-func WithFields(fields map[string]interface{}) Logger {
-	return globalLogger.WithFields(fields)
-}
-
-// Debug calls Debug on the global Logger.
-func Debug(args ...interface{}) {
-	globalLogger.Debug(args...)
-}
-
 // Debugf calls Debugf on the global Logger.
 func Debugf(format string, args ...interface{}) {
 	globalLogger.Debugf(format, args...)
@@ -444,11 +422,6 @@ func Debugf(format string, args ...interface{}) {
 // Debugln calls Debugln on the global Logger.
 func Debugln(args ...interface{}) {
 	globalLogger.Debugln(args...)
-}
-
-// Info calls Info on the global Logger.
-func Info(args ...interface{}) {
-	globalLogger.Info(args...)
 }
 
 // Infof calls Infof on the global Logger.
@@ -461,11 +434,6 @@ func Infoln(args ...interface{}) {
 	globalLogger.Infoln(args...)
 }
 
-// Warn calls Warn on the global Logger.
-func Warn(args ...interface{}) {
-	globalLogger.Warn(args...)
-}
-
 // Warnf calls Warnf on the global Logger.
 func Warnf(format string, args ...interface{}) {
 	globalLogger.Warnf(format, args...)
@@ -474,11 +442,6 @@ func Warnf(format string, args ...interface{}) {
 // Warnln calls Warnln on the global Logger.
 func Warnln(args ...interface{}) {
 	globalLogger.Warnln(args...)
-}
-
-// Error calls Error on the global Logger.
-func Error(args ...interface{}) {
-	globalLogger.Error(args...)
 }
 
 // Errorf calls Errorf on the global Logger.
@@ -491,11 +454,6 @@ func Errorln(args ...interface{}) {
 	globalLogger.Errorln(args...)
 }
 
-// Fatal calls Fatal on the global Logger.
-func Fatal(args ...interface{}) {
-	globalLogger.Fatal(args...)
-}
-
 // Fatalf calls Fatalf on the global Logger.
 func Fatalf(format string, args ...interface{}) {
 	globalLogger.Fatalf(format, args...)
@@ -504,11 +462,6 @@ func Fatalf(format string, args ...interface{}) {
 // Fatalln calls Fatalln on the global Logger.
 func Fatalln(args ...interface{}) {
 	globalLogger.Fatalln(args...)
-}
-
-// Panic calls Panic on the global Logger.
-func Panic(args ...interface{}) {
-	globalLogger.Panic(args...)
 }
 
 // Panicf calls Panicf on the global Logger.
@@ -521,11 +474,6 @@ func Panicln(args ...interface{}) {
 	globalLogger.Panicln(args...)
 }
 
-// Print calls Print on the global Logger.
-func Print(args ...interface{}) {
-	globalLogger.Print(args...)
-}
-
 // Printf calls Printf on the global Logger.
 func Printf(format string, args ...interface{}) {
 	globalLogger.Printf(format, args...)
@@ -534,4 +482,19 @@ func Printf(format string, args ...interface{}) {
 // Println calls Println on the global Logger.
 func Println(args ...interface{}) {
 	globalLogger.Println(args...)
+}
+
+// AtLevel calls AtLevel on the global Logger.
+func AtLevel(level Level) Logger {
+	return globalLogger.AtLevel(level)
+}
+
+// WithField calls WithField on the global Logger.
+func WithField(key string, value interface{}) Logger {
+	return globalLogger.WithField(key, value)
+}
+
+// WithFields calls WithFields on the global Logger.
+func WithFields(fields map[string]interface{}) Logger {
+	return globalLogger.WithFields(fields)
 }

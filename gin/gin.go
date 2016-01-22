@@ -78,10 +78,10 @@ func LoggerAndRecovery(protoLoggerProvider func() protolion.Logger) gin.HandlerF
 			if recoverErr := recover(); recoverErr != nil {
 				stack := stack(3)
 				call.Error = fmt.Sprintf("panic: %s\n%s", recoverErr, string(stack))
-				protoLogger.ProtoError(call)
+				protoLogger.Error(call)
 				c.AbortWithStatus(http.StatusInternalServerError)
 			} else {
-				protoLogger.ProtoInfo(call)
+				protoLogger.Info(call)
 			}
 		}()
 		c.Next()

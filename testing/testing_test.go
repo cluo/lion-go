@@ -28,13 +28,13 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 			lion.LoggerWithTimer(fakeTimer),
 		).AtLevel(lion.LevelDebug),
 	)
-	logger.ProtoDebug(
+	logger.Debug(
 		&Foo{
 			StringField: "one",
 			Int32Field:  2,
 		},
 	)
-	logger.ProtoInfo(
+	logger.Info(
 		&Baz{
 			Bat: &Baz_Bat{
 				Ban: &Baz_Bat_Ban{
@@ -44,7 +44,7 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 			},
 		},
 	)
-	logger.ProtoInfo(&Empty{})
+	logger.Info(&Empty{})
 	writer := logger.InfoWriter()
 	for _, s := range []string{
 		"hello",
@@ -100,13 +100,13 @@ func TestPrintSomeStuff(t *testing.T) {
 }
 
 func testPrintSomeStuff(t *testing.T, logger protolion.Logger) {
-	logger.ProtoDebug(
+	logger.Debug(
 		&Foo{
 			StringField: "one",
 			Int32Field:  2,
 		},
 	)
-	logger.ProtoInfo(
+	logger.Info(
 		&Baz{
 			Bat: &Baz_Bat{
 				Ban: &Baz_Bat_Ban{
@@ -131,7 +131,7 @@ func testPrintSomeStuff(t *testing.T, logger protolion.Logger) {
 	_, _ = writer.Write([]byte("none"))
 	logger.Infoln("a normal line")
 	logger.WithField("someKey", "someValue").WithField("someOtherKey", 1).Warnln("a warning line")
-	protolion.NewLogger(logger.WithField("someKey", "someValue").WithField("someOtherKey", 1)).ProtoInfo(
+	logger.WithField("someKey", "someValue").WithField("someOtherKey", 1).Info(
 		&Baz{
 			Bat: &Baz_Bat{
 				Ban: &Baz_Bat_Ban{
@@ -141,7 +141,7 @@ func testPrintSomeStuff(t *testing.T, logger protolion.Logger) {
 			},
 		},
 	)
-	_ = kitlion.NewLogger(logger).Log("someKey", "someValue", "someOtherKey", 1)
+	_ = kitlion.NewLogger(logger.LionLogger()).Log("someKey", "someValue", "someOtherKey", 1)
 }
 
 type fakeIDAllocator struct {
