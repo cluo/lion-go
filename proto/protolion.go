@@ -55,6 +55,11 @@ type Logger interface {
 	ProtoPrint(event proto.Message)
 }
 
+// GlobalLogger returns the global Logger instance.
+func GlobalLogger() Logger {
+	return globalLogger
+}
+
 // NewLogger returns a new Logger.
 func NewLogger(delegate lion.Logger) Logger {
 	return newLogger(delegate)

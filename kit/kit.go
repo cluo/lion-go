@@ -1,4 +1,9 @@
-package lionkit // import "go.pedge.io/lion/kit"
+/*
+Package kitlion defines functionality to integrate lion with go-kit.
+
+https://github.com/go-kit/kit
+*/
+package kitlion // import "go.pedge.io/lion/kit"
 
 import (
 	"fmt"

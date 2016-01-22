@@ -141,7 +141,7 @@ func testPrintSomeStuff(t *testing.T, logger protolion.Logger) {
 			},
 		},
 	)
-	_ = lionkit.NewLogger(logger).Log("someKey", "someValue", "someOtherKey", 1)
+	_ = kitlion.NewLogger(logger).Log("someKey", "someValue", "someOtherKey", 1)
 }
 
 type fakeIDAllocator struct {
