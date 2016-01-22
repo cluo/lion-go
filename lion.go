@@ -89,11 +89,6 @@ type Flusher interface {
 	Flush() error
 }
 
-// KitLogger matches go-kit's logger.
-type KitLogger interface {
-	Log(keyvals ...interface{}) error
-}
-
 // Logger is the main logging interface. All methods are also replicated
 // on the package and attached to a global Logger.
 type Logger interface {
@@ -130,8 +125,6 @@ type Logger interface {
 	Print(args ...interface{})
 	Printf(format string, args ...interface{})
 	Println(args ...interface{})
-
-	Kit() KitLogger
 
 	// This generally should only be used internally or by sub-loggers such as the protobuf Logger.
 	WithEntryMessageContext(context *EntryMessage) Logger

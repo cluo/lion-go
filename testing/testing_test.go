@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"go.pedge.io/lion"
+	"go.pedge.io/lion/kit"
 	"go.pedge.io/lion/proto"
 
 	"github.com/stretchr/testify/require"
@@ -140,7 +141,7 @@ func testPrintSomeStuff(t *testing.T, logger protolion.Logger) {
 			},
 		},
 	)
-	_ = logger.Kit().Log("someKey", "someValue", "someOtherKey", 1)
+	_ = lionkit.NewLogger(logger).Log("someKey", "someValue", "someOtherKey", 1)
 }
 
 type fakeIDAllocator struct {
