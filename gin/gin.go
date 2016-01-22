@@ -5,10 +5,18 @@ https://github.com/gin-gonic/gin
 
 Full typical use:
 
-	if err := envlion.GetAndSetup(); err != nil {
-		return err
+	import (
+		"go.pedge.io/lion/env"
+		"go.pedge.io/lion/gin"
+	)
+
+	func setupGin() error {
+		if err := envlion.Setup(); err != nil {
+			return err
+		}
+		engine := ginlion.Default()
+		...
 	}
-	engine := ginlion.Default()
 
 Some of the code here is copied from the gin repository.
 This code is under the MIT License that can be found at https://github.com/gin-gonic/gin/blob/master/LICENSE.

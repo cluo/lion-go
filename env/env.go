@@ -1,3 +1,6 @@
+/*
+Package envlion provides simple utilities to setup lion from the environment.
+*/
 package envlion // import "go.pedge.io/lion/env"
 
 import (
@@ -34,17 +37,17 @@ type Env struct {
 	SyslogAddress string `env:"SYSLOG_ADDRESS"`
 }
 
-// GetAndSetup gets the Env from the environment, and then calls Setup.
-func GetAndSetup() error {
+// Setup gets the Env from the environment, and then calls SetupEnv.
+func Setup() error {
 	appEnv := Env{}
 	if err := env.Populate(&appEnv); err != nil {
 		return err
 	}
-	return Setup(appEnv)
+	return SetupEnv(appEnv)
 }
 
-// Setup sets up logging.
-func Setup(env Env) error {
+// SetupEnv sets up logging for the given Env.
+func SetupEnv(env Env) error {
 	var pushers []lion.Pusher
 	logAppName := env.LogAppName
 	if logAppName == "" {
