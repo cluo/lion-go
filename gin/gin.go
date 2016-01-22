@@ -34,7 +34,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.pedge.io/lion/proto"
-	"go.pedge.io/pb/go/google/protobuf"
 )
 
 var (
@@ -60,24 +59,29 @@ func GlobalLoggerAndRecovery() gin.HandlerFunc {
 func LoggerAndRecovery(protoLoggerProvider func() protolion.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
+		var path string
+		if c.Request.URL != nil {
+			path = c.Request.URL.Path
+		}
 		defer func() {
 			call := &Call{
 				Method:         c.Request.Method,
+				Path:           path,
 				RequestHeader:  valuesMap(c.Request.Header),
 				RequestForm:    valuesMap(c.Request.Form),
 				ResponseHeader: valuesMap(c.Writer.Header()),
 				ClientIp:       c.ClientIP(),
 				StatusCode:     uint32(statusCode(c.Writer.Status())),
+				Error:          c.Errors.Errors(),
 			}
 			if c.Request.URL != nil {
-				call.Path = c.Request.URL.Path
 				call.Query = valuesMap(c.Request.URL.Query())
 			}
-			call.Duration = google_protobuf.DurationToProto(time.Since(start))
+			call.Duration = fmt.Sprintf("%13v", time.Since(start))
 			protoLogger := protoLoggerProvider()
 			if recoverErr := recover(); recoverErr != nil {
 				stack := stack(3)
-				call.Error = fmt.Sprintf("panic: %s\n%s", recoverErr, string(stack))
+				call.Error = append(call.Error, fmt.Sprintf("panic: %s\n%s", recoverErr, string(stack)))
 				protoLogger.Error(call)
 				c.AbortWithStatus(http.StatusInternalServerError)
 			} else {

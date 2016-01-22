@@ -15,6 +15,6 @@ message Call {
   map<string, string> response_header = 6;
   string client_ip = 7;
   uint32 status_code = 8;
-  google.protobuf.Duration duration = 9;
-  string error = 10;
+  string duration = 9;
+  repeated string error = 10;
 }
