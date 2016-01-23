@@ -19,6 +19,12 @@ var (
 		LevelFatal: color.RedString(LevelFatal.String()),
 		LevelPanic: color.RedString(LevelPanic.String()),
 	}
+	// TODO(pedge): clean up
+	fourLetterLevels = map[Level]bool{
+		LevelNone: true,
+		LevelInfo: true,
+		LevelWarn: true,
+	}
 )
 
 type textMarshaller struct {
@@ -100,7 +106,7 @@ func textMarshalEntry(
 		}
 		_, _ = buffer.WriteString(levelString)
 		_ = buffer.WriteByte(' ')
-		if len(levelString) == 4 {
+		if _, ok := fourLetterLevels[entry.Level]; ok {
 			_ = buffer.WriteByte(' ')
 		}
 	}
