@@ -123,6 +123,7 @@ type Logger interface {
 	AtLevel(level Level) Logger
 	WithField(key string, value interface{}) Logger
 	WithFields(fields map[string]interface{}) Logger
+	WithKeyValues(keyvalues ...interface{}) Logger
 
 	// This generally should only be used internally or by sub-loggers such as the protobuf Logger.
 	WithEntryMessageContext(context *EntryMessage) Logger

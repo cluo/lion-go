@@ -48,6 +48,7 @@ type Logger interface {
 	AtLevel(level lion.Level) Logger
 	WithField(key string, value interface{}) Logger
 	WithFields(fields map[string]interface{}) Logger
+	WithKeyValues(keyValues ...interface{}) Logger
 
 	WithContext(context proto.Message) Logger
 	Debug(event proto.Message)
@@ -184,6 +185,11 @@ func WithField(key string, value interface{}) Logger {
 // WithFields calls WithFields on the global Logger.
 func WithFields(fields map[string]interface{}) Logger {
 	return globalLogger.WithFields(fields)
+}
+
+// WithKeyValues calls WithKeyValues on the global Logger.
+func WithKeyValues(keyValues ...interface{}) Logger {
+	return globalLogger.WithKeyValues(keyValues...)
 }
 
 // WithContext calls WithContext on the global Logger.

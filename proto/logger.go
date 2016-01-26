@@ -26,6 +26,10 @@ func (l *logger) WithFields(fields map[string]interface{}) Logger {
 	return newLogger(l.Logger.WithFields(fields))
 }
 
+func (l *logger) WithKeyValues(keyValues ...interface{}) Logger {
+	return newLogger(l.Logger.WithKeyValues(keyValues...))
+}
+
 func (l *logger) WithContext(context proto.Message) Logger {
 	return newLogger(l.WithEntryMessageContext(newEntryMessage(context)))
 }
