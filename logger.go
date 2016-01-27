@@ -244,11 +244,18 @@ func (l *logger) LogEntryMessage(level Level, event *EntryMessage) {
 	l.print(level, event, "", nil)
 }
 
-func (l *logger) LogAtLevel(level Level) LevelLogger {
-	if level < l.l {
+func (l *logger) LogDebug() LevelLogger {
+	if LevelDebug < l.l {
 		return discardLevelLoggerInstance
 	}
-	return newLevelLogger(l, level)
+	return newLevelLogger(l, LevelDebug)
+}
+
+func (l *logger) LogInfo() LevelLogger {
+	if LevelInfo < l.l {
+		return discardLevelLoggerInstance
+	}
+	return newLevelLogger(l, LevelInfo)
 }
 
 func (l *logger) print(level Level, event *EntryMessage, message string, writerOutput []byte) {

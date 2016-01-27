@@ -25,14 +25,14 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 					Int32Field:  2,
 				},
 			)
-			logger.LionLogger().LogAtLevel(lion.LevelDebug).WithField("1", "2").Println("hello")
+			logger.LionLogger().LogDebug().WithField("1", "2").Println("hello")
 			logger.Info(
 				&Foo{
 					StringField: "one",
 					Int32Field:  2,
 				},
 			)
-			logger.LionLogger().LogAtLevel(lion.LevelInfo).WithField("3", "4").Println("hello2")
+			logger.LionLogger().LogInfo().WithField("3", "4").Println("hello2")
 			logger.Info(
 				&Baz{
 					Bat: &Baz_Bat{

@@ -152,6 +152,7 @@ type BaseLogger interface {
 //
 // If log calls are ignored, this has better performance than the standard Logger.
 // If log calls are not ignored, this has slightly worse performance than the standard logger.
+//
 // Main use of this is for debug calls.
 type LevelLogger interface {
 	Printf(format string, args ...interface{})
@@ -178,7 +179,9 @@ type Logger interface {
 	LogEntryMessage(level Level, event *EntryMessage)
 
 	// NOTE: this function name may change, this is experimental
-	LogAtLevel(level Level) LevelLogger
+	LogDebug() LevelLogger
+	// NOTE: this function name may change, this is experimental
+	LogInfo() LevelLogger
 }
 
 // EntryMessage is a context or event in an Entry.
@@ -604,7 +607,12 @@ func WithKeyValues(keyValues ...interface{}) Logger {
 	return globalLogger.WithKeyValues(keyValues...)
 }
 
-// LogAtLevel calls LogAtLevel on the global Logger.
-func LogAtLevel(level Level) LevelLogger {
-	return globalLogger.LogAtLevel(level)
+// LogDebug calls LogDebug on the global Logger.
+func LogDebug() LevelLogger {
+	return globalLogger.LogDebug()
+}
+
+// LogInfo calls LogInfo on the global Logger.
+func LogInfo() LevelLogger {
+	return globalLogger.LogInfo()
 }
