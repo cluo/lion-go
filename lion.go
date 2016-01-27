@@ -140,6 +140,14 @@ type BaseLogger interface {
 	Println(args ...interface{})
 }
 
+// BaseLevelLogger is a LevelLogger without the methods that are self-returning.
+//
+// This is so sub-packages can implement these.
+type BaseLevelLogger interface {
+	Printf(format string, args ...interface{})
+	Println(args ...interface{})
+}
+
 // LevelLogger is a logger tied to a specific Level.
 //
 // It is returned from a Logger only.
@@ -155,12 +163,16 @@ type BaseLogger interface {
 //
 // Main use of this is for debug calls.
 type LevelLogger interface {
-	Printf(format string, args ...interface{})
-	Println(args ...interface{})
+	BaseLevelLogger
 
 	WithField(key string, value interface{}) LevelLogger
 	WithFields(fields map[string]interface{}) LevelLogger
 	WithKeyValues(keyvalues ...interface{}) LevelLogger
+
+	// This generally should only be used internally or by sub-loggers such as the protobuf Logger.
+	WithEntryMessageContext(context *EntryMessage) LevelLogger
+	// This generally should only be used internally or by sub-loggers such as the protobuf Logger.
+	LogEntryMessage(level Level, event *EntryMessage)
 }
 
 // Logger is the main logging interface. All methods are also replicated

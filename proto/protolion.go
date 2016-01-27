@@ -53,6 +53,18 @@ func setGlobalLogger(logger lion.Logger) {
 	globalLevel = logger.Level()
 }
 
+// LevelLogger is a lion.LevelLogger that also has proto logging methods.
+type LevelLogger interface {
+	lion.BaseLevelLogger
+
+	WithField(key string, value interface{}) LevelLogger
+	WithFields(fields map[string]interface{}) LevelLogger
+	WithKeyValues(keyvalues ...interface{}) LevelLogger
+	WithContext(context proto.Message) LevelLogger
+
+	Print(event proto.Message)
+}
+
 // Logger is a lion.Logger that also has proto logging methods.
 type Logger interface {
 	lion.BaseLogger
@@ -70,6 +82,11 @@ type Logger interface {
 	Fatal(event proto.Message)
 	Panic(event proto.Message)
 	Print(event proto.Message)
+
+	// NOTE: this function name may change, this is experimental
+	LogDebug() LevelLogger
+	// NOTE: this function name may change, this is experimental
+	LogInfo() LevelLogger
 
 	LionLogger() lion.Logger
 }
@@ -296,6 +313,16 @@ func Panic(event proto.Message) {
 // Print calls Print on the global Logger.
 func Print(event proto.Message) {
 	globalLogger.Print(event)
+}
+
+// LogDebug calls LogDebug on the global Logger.
+func LogDebug() LevelLogger {
+	return globalLogger.LogDebug()
+}
+
+// LogInfo calls LogInfo on the global Logger.
+func LogInfo() LevelLogger {
+	return globalLogger.LogInfo()
 }
 
 // LionLogger calls LionLogger on the global Logger.

@@ -340,14 +340,20 @@ func (l *levelLogger) WithKeyValues(keyValues ...interface{}) LevelLogger {
 	return &levelLogger{l.logger.WithKeyValues(keyValues...).(*logger), l.level}
 }
 
+func (l *levelLogger) WithEntryMessageContext(context *EntryMessage) LevelLogger {
+	return &levelLogger{l.logger.WithEntryMessageContext(context).(*logger), l.level}
+}
+
 type discardLevelLogger struct{}
 
 func newDiscardLevelLogger() *discardLevelLogger {
 	return &discardLevelLogger{}
 }
 
-func (d *discardLevelLogger) Printf(format string, args ...interface{})            {}
-func (d *discardLevelLogger) Println(args ...interface{})                          {}
-func (d *discardLevelLogger) WithField(key string, value interface{}) LevelLogger  { return d }
-func (d *discardLevelLogger) WithFields(fields map[string]interface{}) LevelLogger { return d }
-func (d *discardLevelLogger) WithKeyValues(keyvalues ...interface{}) LevelLogger   { return d }
+func (d *discardLevelLogger) Printf(format string, args ...interface{})                 {}
+func (d *discardLevelLogger) Println(args ...interface{})                               {}
+func (d *discardLevelLogger) WithField(key string, value interface{}) LevelLogger       { return d }
+func (d *discardLevelLogger) WithFields(fields map[string]interface{}) LevelLogger      { return d }
+func (d *discardLevelLogger) WithKeyValues(keyvalues ...interface{}) LevelLogger        { return d }
+func (d *discardLevelLogger) WithEntryMessageContext(context *EntryMessage) LevelLogger { return d }
+func (d *discardLevelLogger) LogEntryMessage(level Level, event *EntryMessage)          {}

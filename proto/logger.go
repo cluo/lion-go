@@ -6,6 +6,10 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
+var (
+	discardLevelLoggerInstance = newDiscardLevelLogger()
+)
+
 type logger struct {
 	lion.Logger
 	l lion.Level
@@ -81,6 +85,20 @@ func (l *logger) Print(event proto.Message) {
 	l.LogEntryMessage(lion.LevelNone, newEntryMessage(event))
 }
 
+func (l *logger) LogDebug() LevelLogger {
+	if lion.LevelDebug < l.l {
+		return discardLevelLoggerInstance
+	}
+	return newLevelLogger(l.Logger.LogDebug(), l.l)
+}
+
+func (l *logger) LogInfo() LevelLogger {
+	if lion.LevelInfo < l.l {
+		return discardLevelLoggerInstance
+	}
+	return newLevelLogger(l.Logger.LogInfo(), l.l)
+}
+
 func (l *logger) LionLogger() lion.Logger {
 	return l.Logger
 }
@@ -91,3 +109,46 @@ func newEntryMessage(message proto.Message) *lion.EntryMessage {
 		Value:    message,
 	}
 }
+
+type levelLogger struct {
+	lion.LevelLogger
+	level lion.Level
+}
+
+func newLevelLogger(logger lion.LevelLogger, level lion.Level) *levelLogger {
+	return &levelLogger{logger, level}
+}
+
+func (l *levelLogger) WithField(key string, value interface{}) LevelLogger {
+	return &levelLogger{l.LevelLogger.WithField(key, value), l.level}
+}
+
+func (l *levelLogger) WithFields(fields map[string]interface{}) LevelLogger {
+	return &levelLogger{l.LevelLogger.WithFields(fields), l.level}
+}
+
+func (l *levelLogger) WithKeyValues(keyValues ...interface{}) LevelLogger {
+	return &levelLogger{l.LevelLogger.WithKeyValues(keyValues...), l.level}
+}
+
+func (l *levelLogger) WithContext(context proto.Message) LevelLogger {
+	return &levelLogger{l.LevelLogger.WithEntryMessageContext(newEntryMessage(context)), l.level}
+}
+
+func (l *levelLogger) Print(event proto.Message) {
+	l.LogEntryMessage(l.level, newEntryMessage(event))
+}
+
+type discardLevelLogger struct{}
+
+func newDiscardLevelLogger() *discardLevelLogger {
+	return &discardLevelLogger{}
+}
+
+func (d *discardLevelLogger) Printf(format string, args ...interface{})            {}
+func (d *discardLevelLogger) Println(args ...interface{})                          {}
+func (d *discardLevelLogger) WithField(key string, value interface{}) LevelLogger  { return d }
+func (d *discardLevelLogger) WithFields(fields map[string]interface{}) LevelLogger { return d }
+func (d *discardLevelLogger) WithKeyValues(keyvalues ...interface{}) LevelLogger   { return d }
+func (d *discardLevelLogger) WithContext(context proto.Message) LevelLogger        { return d }
+func (d *discardLevelLogger) Print(event proto.Message)                            {}
