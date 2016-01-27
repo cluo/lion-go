@@ -133,20 +133,12 @@ func (l *logger) WithKeyValues(keyValues ...interface{}) Logger {
 	return l.WithFields(fields)
 }
 
-func (l *logger) Debug(args ...interface{}) {
-	l.print(LevelDebug, nil, fmt.Sprint(args...), nil)
-}
-
 func (l *logger) Debugf(format string, args ...interface{}) {
 	l.print(LevelDebug, nil, fmt.Sprintf(format, args...), nil)
 }
 
 func (l *logger) Debugln(args ...interface{}) {
 	l.print(LevelDebug, nil, fmt.Sprint(args...), nil)
-}
-
-func (l *logger) Info(args ...interface{}) {
-	l.print(LevelInfo, nil, fmt.Sprint(args...), nil)
 }
 
 func (l *logger) Infof(format string, args ...interface{}) {
@@ -157,10 +149,6 @@ func (l *logger) Infoln(args ...interface{}) {
 	l.print(LevelInfo, nil, fmt.Sprint(args...), nil)
 }
 
-func (l *logger) Warn(args ...interface{}) {
-	l.print(LevelWarn, nil, fmt.Sprint(args...), nil)
-}
-
 func (l *logger) Warnf(format string, args ...interface{}) {
 	l.print(LevelWarn, nil, fmt.Sprintf(format, args...), nil)
 }
@@ -169,21 +157,12 @@ func (l *logger) Warnln(args ...interface{}) {
 	l.print(LevelWarn, nil, fmt.Sprint(args...), nil)
 }
 
-func (l *logger) Error(args ...interface{}) {
-	l.print(LevelError, nil, fmt.Sprint(args...), nil)
-}
-
 func (l *logger) Errorf(format string, args ...interface{}) {
 	l.print(LevelError, nil, fmt.Sprintf(format, args...), nil)
 }
 
 func (l *logger) Errorln(args ...interface{}) {
 	l.print(LevelError, nil, fmt.Sprint(args...), nil)
-}
-
-func (l *logger) Fatal(args ...interface{}) {
-	l.print(LevelFatal, nil, fmt.Sprint(args...), nil)
-	os.Exit(1)
 }
 
 func (l *logger) Fatalf(format string, args ...interface{}) {
@@ -196,11 +175,6 @@ func (l *logger) Fatalln(args ...interface{}) {
 	os.Exit(1)
 }
 
-func (l *logger) Panic(args ...interface{}) {
-	l.print(LevelPanic, nil, fmt.Sprint(args...), nil)
-	panic(fmt.Sprint(args...))
-}
-
 func (l *logger) Panicf(format string, args ...interface{}) {
 	l.print(LevelPanic, nil, fmt.Sprintf(format, args...), nil)
 	panic(fmt.Sprintf(format, args...))
@@ -209,10 +183,6 @@ func (l *logger) Panicf(format string, args ...interface{}) {
 func (l *logger) Panicln(args ...interface{}) {
 	l.print(LevelPanic, nil, fmt.Sprint(args...), nil)
 	panic(fmt.Sprint(args...))
-}
-
-func (l *logger) Print(args ...interface{}) {
-	l.print(LevelNone, nil, fmt.Sprint(args...), nil)
 }
 
 func (l *logger) Printf(format string, args ...interface{}) {
