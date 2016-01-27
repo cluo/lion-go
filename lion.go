@@ -42,6 +42,7 @@ var (
 	DefaultLogger = NewLogger(DefaultPusher)
 
 	globalLogger          = DefaultLogger
+	globalLevel           = DefaultLevel
 	globalJSONMarshalFunc = DefaultJSONMarshalFunc
 	globalHooks           = make([]GlobalHook, 0)
 	globalLock            = &sync.Mutex{}
@@ -60,6 +61,7 @@ func SetLogger(logger Logger) {
 	globalLock.Lock()
 	defer globalLock.Unlock()
 	globalLogger = logger
+	globalLevel = logger.Level()
 	for _, globalHook := range globalHooks {
 		globalHook(globalLogger)
 	}
@@ -70,6 +72,7 @@ func SetLevel(level Level) {
 	globalLock.Lock()
 	defer globalLock.Unlock()
 	globalLogger = globalLogger.AtLevel(level)
+	globalLevel = level
 	for _, globalHook := range globalHooks {
 		globalHook(globalLogger)
 	}
@@ -115,6 +118,7 @@ type Flusher interface {
 // This is so sub-packages can implement these.
 type BaseLogger interface {
 	Flusher
+	Level() Level
 	DebugWriter() io.Writer
 	InfoWriter() io.Writer
 	WarnWriter() io.Writer
@@ -451,61 +455,97 @@ func Writer() io.Writer {
 
 // Debugf calls Debugf on the global Logger.
 func Debugf(format string, args ...interface{}) {
+	if LevelDebug < globalLevel {
+		return
+	}
 	globalLogger.Debugf(format, args...)
 }
 
 // Debugln calls Debugln on the global Logger.
 func Debugln(args ...interface{}) {
+	if LevelDebug < globalLevel {
+		return
+	}
 	globalLogger.Debugln(args...)
 }
 
 // Infof calls Infof on the global Logger.
 func Infof(format string, args ...interface{}) {
+	if LevelInfo < globalLevel {
+		return
+	}
 	globalLogger.Infof(format, args...)
 }
 
 // Infoln calls Infoln on the global Logger.
 func Infoln(args ...interface{}) {
+	if LevelInfo < globalLevel {
+		return
+	}
 	globalLogger.Infoln(args...)
 }
 
 // Warnf calls Warnf on the global Logger.
 func Warnf(format string, args ...interface{}) {
+	if LevelWarn < globalLevel {
+		return
+	}
 	globalLogger.Warnf(format, args...)
 }
 
 // Warnln calls Warnln on the global Logger.
 func Warnln(args ...interface{}) {
+	if LevelWarn < globalLevel {
+		return
+	}
 	globalLogger.Warnln(args...)
 }
 
 // Errorf calls Errorf on the global Logger.
 func Errorf(format string, args ...interface{}) {
+	if LevelError < globalLevel {
+		return
+	}
 	globalLogger.Errorf(format, args...)
 }
 
 // Errorln calls Errorln on the global Logger.
 func Errorln(args ...interface{}) {
+	if LevelError < globalLevel {
+		return
+	}
 	globalLogger.Errorln(args...)
 }
 
 // Fatalf calls Fatalf on the global Logger.
 func Fatalf(format string, args ...interface{}) {
+	if LevelFatal < globalLevel {
+		return
+	}
 	globalLogger.Fatalf(format, args...)
 }
 
 // Fatalln calls Fatalln on the global Logger.
 func Fatalln(args ...interface{}) {
+	if LevelFatal < globalLevel {
+		return
+	}
 	globalLogger.Fatalln(args...)
 }
 
 // Panicf calls Panicf on the global Logger.
 func Panicf(format string, args ...interface{}) {
+	if LevelPanic < globalLevel {
+		return
+	}
 	globalLogger.Panicf(format, args...)
 }
 
 // Panicln calls Panicln on the global Logger.
 func Panicln(args ...interface{}) {
+	if LevelPanic < globalLevel {
+		return
+	}
 	globalLogger.Panicln(args...)
 }
 

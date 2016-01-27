@@ -26,6 +26,12 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 				},
 			)
 			logger.Info(
+				&Foo{
+					StringField: "one",
+					Int32Field:  2,
+				},
+			)
+			logger.Info(
 				&Baz{
 					Bat: &Baz_Bat{
 						Ban: &Baz_Bat_Ban{
@@ -58,7 +64,7 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 			logger.Infoln("a normal line")
 			logger.WithField("someKey", "someValue").Warnln("a warning line")
 		},
-		`DEBUG lion.testing.Foo {"one":"","two":0,"string_field":"one","int32_field":2}
+		`INFO  lion.testing.Foo {"one":"","two":0,"string_field":"one","int32_field":2}
 INFO  lion.testing.Baz {"bat":{"ban":{"string_field":"one","int32_field":2}}}
 INFO  lion.testing.Empty {}
 INFO  lion.testing.NoStdJson {"one":{"1":"one","2":"two"}}
@@ -100,7 +106,7 @@ func testRoundTripAndTextMarshaller(t *testing.T, f func(protolion.Logger), expe
 			),
 			lion.LoggerWithIDAllocator(newFakeIDAllocator()),
 			lion.LoggerWithTimer(fakeTimer),
-		).AtLevel(lion.LevelDebug),
+		),
 	)
 	f(logger)
 	puller := lion.NewReadPuller(

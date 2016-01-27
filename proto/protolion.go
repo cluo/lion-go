@@ -33,6 +33,7 @@ var (
 	globalSecondaryPackage   = "gogo"
 	globalOnlyPrimaryPackage = true
 	globalLogger             Logger
+	globalLevel              = lion.DefaultLevel
 	globalLock               = &sync.Mutex{}
 	globalJSONMarshaler      = &jsonpb.Marshaler{}
 )
@@ -49,6 +50,7 @@ func setGlobalLogger(logger lion.Logger) {
 	globalLock.Lock()
 	defer globalLock.Unlock()
 	globalLogger = NewLogger(logger)
+	globalLevel = logger.Level()
 }
 
 // Logger is a lion.Logger that also has proto logging methods.
@@ -114,61 +116,97 @@ func Writer() io.Writer {
 
 // Debugf calls Debugf on the global Logger.
 func Debugf(format string, args ...interface{}) {
+	if lion.LevelDebug < globalLevel {
+		return
+	}
 	globalLogger.Debugf(format, args...)
 }
 
 // Debugln calls Debugln on the global Logger.
 func Debugln(args ...interface{}) {
+	if lion.LevelDebug < globalLevel {
+		return
+	}
 	globalLogger.Debugln(args...)
 }
 
 // Infof calls Infof on the global Logger.
 func Infof(format string, args ...interface{}) {
+	if lion.LevelInfo < globalLevel {
+		return
+	}
 	globalLogger.Infof(format, args...)
 }
 
 // Infoln calls Infoln on the global Logger.
 func Infoln(args ...interface{}) {
+	if lion.LevelInfo < globalLevel {
+		return
+	}
 	globalLogger.Infoln(args...)
 }
 
 // Warnf calls Warnf on the global Logger.
 func Warnf(format string, args ...interface{}) {
+	if lion.LevelWarn < globalLevel {
+		return
+	}
 	globalLogger.Warnf(format, args...)
 }
 
 // Warnln calls Warnln on the global Logger.
 func Warnln(args ...interface{}) {
+	if lion.LevelWarn < globalLevel {
+		return
+	}
 	globalLogger.Warnln(args...)
 }
 
 // Errorf calls Errorf on the global Logger.
 func Errorf(format string, args ...interface{}) {
+	if lion.LevelError < globalLevel {
+		return
+	}
 	globalLogger.Errorf(format, args...)
 }
 
 // Errorln calls Errorln on the global Logger.
 func Errorln(args ...interface{}) {
+	if lion.LevelError < globalLevel {
+		return
+	}
 	globalLogger.Errorln(args...)
 }
 
 // Fatalf calls Fatalf on the global Logger.
 func Fatalf(format string, args ...interface{}) {
+	if lion.LevelFatal < globalLevel {
+		return
+	}
 	globalLogger.Fatalf(format, args...)
 }
 
 // Fatalln calls Fatalln on the global Logger.
 func Fatalln(args ...interface{}) {
+	if lion.LevelFatal < globalLevel {
+		return
+	}
 	globalLogger.Fatalln(args...)
 }
 
 // Panicf calls Panicf on the global Logger.
 func Panicf(format string, args ...interface{}) {
+	if lion.LevelPanic < globalLevel {
+		return
+	}
 	globalLogger.Panicf(format, args...)
 }
 
 // Panicln calls Panicln on the global Logger.
 func Panicln(args ...interface{}) {
+	if lion.LevelPanic < globalLevel {
+		return
+	}
 	globalLogger.Panicln(args...)
 }
 
@@ -209,31 +247,49 @@ func WithContext(context proto.Message) Logger {
 
 // Debug calls Debug on the global Logger.
 func Debug(event proto.Message) {
+	if lion.LevelDebug < globalLevel {
+		return
+	}
 	globalLogger.Debug(event)
 }
 
 // Info calls Info on the global Logger.
 func Info(event proto.Message) {
+	if lion.LevelInfo < globalLevel {
+		return
+	}
 	globalLogger.Info(event)
 }
 
 // Warn calls Warn on the global Logger.
 func Warn(event proto.Message) {
+	if lion.LevelWarn < globalLevel {
+		return
+	}
 	globalLogger.Warn(event)
 }
 
 // Error calls Error on the global Logger.
 func Error(event proto.Message) {
+	if lion.LevelError < globalLevel {
+		return
+	}
 	globalLogger.Error(event)
 }
 
 // Fatal calls Fatal on the global Logger.
 func Fatal(event proto.Message) {
+	if lion.LevelFatal < globalLevel {
+		return
+	}
 	globalLogger.Fatal(event)
 }
 
 // Panic calls Panic on the global Logger.
 func Panic(event proto.Message) {
+	if lion.LevelPanic < globalLevel {
+		return
+	}
 	globalLogger.Panic(event)
 }
 
