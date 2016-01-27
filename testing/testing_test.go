@@ -25,12 +25,14 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 					Int32Field:  2,
 				},
 			)
+			logger.LionLogger().LogAtLevel(lion.LevelDebug).WithField("1", "2").Println("hello")
 			logger.Info(
 				&Foo{
 					StringField: "one",
 					Int32Field:  2,
 				},
 			)
+			logger.LionLogger().LogAtLevel(lion.LevelInfo).WithField("3", "4").Println("hello2")
 			logger.Info(
 				&Baz{
 					Bat: &Baz_Bat{
@@ -65,6 +67,7 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 			logger.WithField("someKey", "someValue").Warnln("a warning line")
 		},
 		`INFO  lion.testing.Foo {"one":"","two":0,"string_field":"one","int32_field":2}
+INFO  hello2 {"3":"4"}
 INFO  lion.testing.Baz {"bat":{"ban":{"string_field":"one","int32_field":2}}}
 INFO  lion.testing.Empty {}
 INFO  lion.testing.NoStdJson {"one":{"1":"one","2":"two"}}

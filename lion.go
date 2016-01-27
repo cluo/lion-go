@@ -140,6 +140,28 @@ type BaseLogger interface {
 	Println(args ...interface{})
 }
 
+// LevelLogger is a logger tied to a specific Level.
+//
+// It is returned from a Logger only.
+//
+// If the requested Level is less than the Logger's level
+// when LevelLogger is constructed, a discard logger will be
+// returned. This is to help with performance concerns of doing
+// lots of WithField/WithFields/etc calls, and then at the end
+// finding the level is discarded.
+//
+// If log calls are ignored, this has better performance than the standard Logger.
+// If log calls are not ignored, this has slightly worse performance than the standard logger.
+// Main use of this is for debug calls.
+type LevelLogger interface {
+	Printf(format string, args ...interface{})
+	Println(args ...interface{})
+
+	WithField(key string, value interface{}) LevelLogger
+	WithFields(fields map[string]interface{}) LevelLogger
+	WithKeyValues(keyvalues ...interface{}) LevelLogger
+}
+
 // Logger is the main logging interface. All methods are also replicated
 // on the package and attached to a global Logger.
 type Logger interface {
@@ -154,6 +176,9 @@ type Logger interface {
 	WithEntryMessageContext(context *EntryMessage) Logger
 	// This generally should only be used internally or by sub-loggers such as the protobuf Logger.
 	LogEntryMessage(level Level, event *EntryMessage)
+
+	// NOTE: this function name may change, this is experimental
+	LogAtLevel(level Level) LevelLogger
 }
 
 // EntryMessage is a context or event in an Entry.
@@ -577,4 +602,9 @@ func WithFields(fields map[string]interface{}) Logger {
 // WithKeyValues calls WithKeyValues on the global Logger.
 func WithKeyValues(keyValues ...interface{}) Logger {
 	return globalLogger.WithKeyValues(keyValues...)
+}
+
+// LogAtLevel calls LogAtLevel on the global Logger.
+func LogAtLevel(level Level) LevelLogger {
+	return globalLogger.LogAtLevel(level)
 }

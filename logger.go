@@ -6,6 +6,10 @@ import (
 	"os"
 )
 
+var (
+	discardLevelLoggerInstance = newDiscardLevelLogger()
+)
+
 type logger struct {
 	pusher       Pusher
 	enableID     bool
@@ -240,6 +244,13 @@ func (l *logger) LogEntryMessage(level Level, event *EntryMessage) {
 	l.print(level, event, "", nil)
 }
 
+func (l *logger) LogAtLevel(level Level) LevelLogger {
+	if level < l.l {
+		return discardLevelLoggerInstance
+	}
+	return newLevelLogger(l, level)
+}
+
 func (l *logger) print(level Level, event *EntryMessage, message string, writerOutput []byte) {
 	if err := l.printWithError(level, event, message, writerOutput); err != nil {
 		l.errorHandler.Handle(err)
@@ -292,3 +303,44 @@ func (w *logWriter) Write(p []byte) (int, error) {
 	}
 	return len(p), nil
 }
+
+type levelLogger struct {
+	*logger
+	level Level
+}
+
+func newLevelLogger(logger *logger, level Level) *levelLogger {
+	return &levelLogger{logger, level}
+}
+
+func (l *levelLogger) Printf(format string, args ...interface{}) {
+	l.print(l.level, nil, fmt.Sprintf(format, args...), nil)
+}
+
+func (l *levelLogger) Println(args ...interface{}) {
+	l.print(l.level, nil, fmt.Sprint(args...), nil)
+}
+
+func (l *levelLogger) WithField(key string, value interface{}) LevelLogger {
+	return &levelLogger{l.logger.WithField(key, value).(*logger), l.level}
+}
+
+func (l *levelLogger) WithFields(fields map[string]interface{}) LevelLogger {
+	return &levelLogger{l.logger.WithFields(fields).(*logger), l.level}
+}
+
+func (l *levelLogger) WithKeyValues(keyValues ...interface{}) LevelLogger {
+	return &levelLogger{l.logger.WithKeyValues(keyValues...).(*logger), l.level}
+}
+
+type discardLevelLogger struct{}
+
+func newDiscardLevelLogger() *discardLevelLogger {
+	return &discardLevelLogger{}
+}
+
+func (d *discardLevelLogger) Printf(format string, args ...interface{})            {}
+func (d *discardLevelLogger) Println(args ...interface{})                          {}
+func (d *discardLevelLogger) WithField(key string, value interface{}) LevelLogger  { return d }
+func (d *discardLevelLogger) WithFields(fields map[string]interface{}) LevelLogger { return d }
+func (d *discardLevelLogger) WithKeyValues(keyvalues ...interface{}) LevelLogger   { return d }
