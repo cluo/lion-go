@@ -32,10 +32,11 @@ var (
 
 type delimitedMarshaller struct {
 	base64Encode bool
+	newline      bool
 }
 
-func newDelimitedMarshaller(base64Encode bool) *delimitedMarshaller {
-	return &delimitedMarshaller{base64Encode}
+func newDelimitedMarshaller(base64Encode bool, newline bool) *delimitedMarshaller {
+	return &delimitedMarshaller{base64Encode, newline}
 }
 
 func (m *delimitedMarshaller) Marshal(entry *lion.Entry) ([]byte, error) {
@@ -48,7 +49,7 @@ func (m *delimitedMarshaller) Marshal(entry *lion.Entry) ([]byte, error) {
 		return nil, err
 	}
 	buffer := bytes.NewBuffer(nil)
-	if _, err := writeDelimited(buffer, protoEntry, m.base64Encode); err != nil {
+	if _, err := writeDelimited(buffer, protoEntry, m.base64Encode, m.newline); err != nil {
 		return nil, err
 	}
 	data := buffer.Bytes()
@@ -57,15 +58,16 @@ func (m *delimitedMarshaller) Marshal(entry *lion.Entry) ([]byte, error) {
 
 type delimitedUnmarshaller struct {
 	base64Decode bool
+	newline      bool
 }
 
-func newDelimitedUnmarshaller(base64Decode bool) *delimitedUnmarshaller {
-	return &delimitedUnmarshaller{base64Decode}
+func newDelimitedUnmarshaller(base64Decode bool, newline bool) *delimitedUnmarshaller {
+	return &delimitedUnmarshaller{base64Decode, newline}
 }
 
 func (u *delimitedUnmarshaller) Unmarshal(reader io.Reader, encodedEntry *lion.EncodedEntry) error {
 	protoEntry := &Entry{}
-	if _, err := readDelimited(reader, protoEntry, u.base64Decode); err != nil {
+	if _, err := readDelimited(reader, protoEntry, u.base64Decode, u.newline); err != nil {
 		return err
 	}
 	iEntry, err := protoEntryToEncodedEntry(protoEntry)

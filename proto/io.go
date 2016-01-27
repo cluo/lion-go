@@ -23,7 +23,7 @@ var errInvalidVarint = errors.New("invalid varint32 encountered")
 // encoded messages of the same type together in a file.  It returns the total
 // number of bytes written and any applicable error.  This is roughly
 // equivalent to the companion Java API's MessageLite#writeDelimitedTo.
-func writeDelimited(w io.Writer, m proto.Message, base64Encode bool) (int, error) {
+func writeDelimited(w io.Writer, m proto.Message, base64Encode bool, newline bool) (int, error) {
 	buffer, err := proto.Marshal(m)
 	if err != nil {
 		return 0, err
@@ -45,7 +45,7 @@ func writeDelimited(w io.Writer, m proto.Message, base64Encode bool) (int, error
 	if err != nil {
 		return sync, err
 	}
-	if base64Encode {
+	if newline {
 		n, err = w.Write([]byte{'\n'})
 		sync += n
 	}
@@ -63,7 +63,7 @@ func writeDelimited(w io.Writer, m proto.Message, base64Encode bool) (int, error
 // an error if a message has been read and decoded correctly, even if the end
 // of the stream has been reached in doing so.  In that case, any subsequent
 // calls return (0, io.EOF).
-func readDelimited(r io.Reader, m proto.Message, base64Decode bool) (int, error) {
+func readDelimited(r io.Reader, m proto.Message, base64Decode bool, newline bool) (int, error) {
 	// Per AbstractParser#parsePartialDelimitedFrom with
 	// CodedInputStream#readRawVarint32.
 	headerBuf := make([]byte, binary.MaxVarintLen32)
@@ -103,6 +103,8 @@ func readDelimited(r io.Reader, m proto.Message, base64Decode bool) (int, error)
 		if err != nil {
 			return bytesRead, err
 		}
+	}
+	if newline {
 		newlineBuf := make([]byte, 1)
 		n, err := io.ReadFull(r, newlineBuf)
 		bytesRead += n

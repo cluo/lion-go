@@ -103,7 +103,7 @@ func TestLevelNone(t *testing.T) {
 
 func testBothRoundTripAndTextMarshaller(t *testing.T, f func(protolion.Logger), expected string) {
 	testRoundTripAndTextMarshaller(t, f, expected)
-	//testRoundTripAndTextMarshallerTail(t, f, expected)
+	testRoundTripAndTextMarshallerTail(t, f, expected)
 }
 
 func testRoundTripAndTextMarshaller(t *testing.T, f func(protolion.Logger), expected string) {
@@ -167,7 +167,7 @@ func testRoundTripAndTextMarshallerTail(t *testing.T, f func(protolion.Logger), 
 		lion.NewLogger(
 			lion.NewWritePusher(
 				file,
-				protolion.Base64DelimitedMarshaller,
+				protolion.Base64DelimitedNewlineMarshaller,
 			),
 			lion.LoggerWithIDAllocator(newFakeIDAllocator()),
 			lion.LoggerWithTimer(fakeTimer),
