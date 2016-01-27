@@ -6,3 +6,7 @@
 ```shell
 go get go.pedge.io/lion
 ```
+
+# NOTICE
+
+This will soon be merged into https://go.pedge.io/protolog (which will be renamed lion), and this repository will be deleted. The go import path will remain `go.pedge.io/lion`, but the repository will change.
