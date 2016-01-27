@@ -16,6 +16,80 @@ import (
 )
 
 func TestRoundtripAndTextMarshaller(t *testing.T) {
+	testRoundTripAndTextMarshaller(
+		t,
+		func(logger protolion.Logger) {
+			logger.Debug(
+				&Foo{
+					StringField: "one",
+					Int32Field:  2,
+				},
+			)
+			logger.Info(
+				&Baz{
+					Bat: &Baz_Bat{
+						Ban: &Baz_Bat_Ban{
+							StringField: "one",
+							Int32Field:  2,
+						},
+					},
+				},
+			)
+			logger.Info(&Empty{})
+			logger.Info(&NoStdJson{
+				One: map[uint64]string{
+					1: "one",
+					2: "two",
+				},
+			})
+			writer := logger.InfoWriter()
+			for _, s := range []string{
+				"hello",
+				"world",
+				"writing",
+				"strings",
+				"is",
+				"fun",
+			} {
+				_, _ = writer.Write([]byte(s))
+			}
+			writer = logger.Writer()
+			_, _ = writer.Write([]byte("none"))
+			logger.Infoln("a normal line")
+			logger.WithField("someKey", "someValue").Warnln("a warning line")
+		},
+		`DEBUG lion.testing.Foo {"one":"","two":0,"string_field":"one","int32_field":2}
+INFO  lion.testing.Baz {"bat":{"ban":{"string_field":"one","int32_field":2}}}
+INFO  lion.testing.Empty {}
+INFO  lion.testing.NoStdJson {"one":{"1":"one","2":"two"}}
+INFO  hello
+INFO  world
+INFO  writing
+INFO  strings
+INFO  is
+INFO  fun
+NONE  none
+INFO  a normal line
+WARN  a warning line {"someKey":"someValue"}
+`,
+	)
+}
+
+func TestLevelNone(t *testing.T) {
+	testRoundTripAndTextMarshaller(
+		t,
+		func(logger protolion.Logger) {
+			logger = logger.AtLevel(lion.LevelPanic)
+			logger.Errorln("hello")
+			logger.Println("hello")
+			logger = logger.AtLevel(lion.LevelNone)
+			logger.Println("hello2")
+		},
+		"NONE  hello\nNONE  hello2\n",
+	)
+}
+
+func testRoundTripAndTextMarshaller(t *testing.T, f func(protolion.Logger), expected string) {
 	buffer := bytes.NewBuffer(nil)
 	fakeTimer := newFakeTimer(0)
 	logger := protolion.NewLogger(
@@ -28,45 +102,7 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 			lion.LoggerWithTimer(fakeTimer),
 		).AtLevel(lion.LevelDebug),
 	)
-	logger.Debug(
-		&Foo{
-			StringField: "one",
-			Int32Field:  2,
-		},
-	)
-	logger.Info(
-		&Baz{
-			Bat: &Baz_Bat{
-				Ban: &Baz_Bat_Ban{
-					StringField: "one",
-					Int32Field:  2,
-				},
-			},
-		},
-	)
-	logger.Info(&Empty{})
-	logger.Info(&NoStdJson{
-		One: map[uint64]string{
-			1: "one",
-			2: "two",
-		},
-	})
-	writer := logger.InfoWriter()
-	for _, s := range []string{
-		"hello",
-		"world",
-		"writing",
-		"strings",
-		"is",
-		"fun",
-	} {
-		_, _ = writer.Write([]byte(s))
-	}
-	writer = logger.Writer()
-	_, _ = writer.Write([]byte("none"))
-	logger.Infoln("a normal line")
-	logger.WithField("someKey", "someValue").Warnln("a warning line")
-
+	f(logger)
 	puller := lion.NewReadPuller(
 		buffer,
 		protolion.DelimitedUnmarshaller,
@@ -82,24 +118,7 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 		require.NoError(t, err)
 		require.NoError(t, writePusher.Push(entry))
 	}
-	require.Equal(
-		t,
-		`DEBUG lion.testing.Foo {"one":"","two":0,"string_field":"one","int32_field":2}
-INFO  lion.testing.Baz {"bat":{"ban":{"string_field":"one","int32_field":2}}}
-INFO  lion.testing.Empty {}
-INFO  lion.testing.NoStdJson {"one":{"1":"one","2":"two"}}
-INFO  hello
-INFO  world
-INFO  writing
-INFO  strings
-INFO  is
-INFO  fun
-NONE  none
-INFO  a normal line
-WARN  a warning line {"someKey":"someValue"}
-`,
-		writeBuffer.String(),
-	)
+	require.Equal(t, expected, writeBuffer.String())
 }
 
 func TestPrintSomeStuff(t *testing.T) {

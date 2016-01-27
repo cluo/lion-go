@@ -268,7 +268,7 @@ func (l *logger) printWithError(level Level, event *EntryMessage, message string
 }
 
 func (l *logger) isLoggedLevel(level Level) bool {
-	return level >= l.level || level == LevelNone
+	return level >= l.level
 }
 
 type logWriter struct {
