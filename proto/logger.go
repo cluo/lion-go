@@ -8,10 +8,11 @@ import (
 
 type logger struct {
 	lion.Logger
+	l lion.Level
 }
 
 func newLogger(delegate lion.Logger) *logger {
-	return &logger{delegate}
+	return &logger{delegate, delegate.Level()}
 }
 
 func (l *logger) AtLevel(level lion.Level) Logger {
@@ -35,26 +36,44 @@ func (l *logger) WithContext(context proto.Message) Logger {
 }
 
 func (l *logger) Debug(event proto.Message) {
+	if lion.LevelDebug < l.l {
+		return
+	}
 	l.LogEntryMessage(lion.LevelDebug, newEntryMessage(event))
 }
 
 func (l *logger) Info(event proto.Message) {
+	if lion.LevelInfo < l.l {
+		return
+	}
 	l.LogEntryMessage(lion.LevelInfo, newEntryMessage(event))
 }
 
 func (l *logger) Warn(event proto.Message) {
+	if lion.LevelWarn < l.l {
+		return
+	}
 	l.LogEntryMessage(lion.LevelWarn, newEntryMessage(event))
 }
 
 func (l *logger) Error(event proto.Message) {
+	if lion.LevelError < l.l {
+		return
+	}
 	l.LogEntryMessage(lion.LevelError, newEntryMessage(event))
 }
 
 func (l *logger) Fatal(event proto.Message) {
+	if lion.LevelFatal < l.l {
+		return
+	}
 	l.LogEntryMessage(lion.LevelFatal, newEntryMessage(event))
 }
 
 func (l *logger) Panic(event proto.Message) {
+	if lion.LevelPanic < l.l {
+		return
+	}
 	l.LogEntryMessage(lion.LevelPanic, newEntryMessage(event))
 }
 
