@@ -9,6 +9,7 @@ import (
 
 	"go.pedge.io/lion"
 
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -20,18 +21,27 @@ var (
 	DelimitedMarshaller = &delimitedMarshaller{}
 	// DelimitedUnmarshaller is an Unmarshaller that uses the protocol buffers write delimited scheme.
 	DelimitedUnmarshaller = &delimitedUnmarshaller{}
+	// DefaultJSONMarshalFunc is the default protocol buffers JSONMarshalFunc.
+	DefaultJSONMarshalFunc = func(writer io.Writer, data interface{}) error {
+		if message, ok := data.(proto.Message); ok {
+			return globalJSONMarshaler.Marshal(writer, message)
+		}
+		return lion.DefaultJSONMarshalFunc(writer, data)
+	}
 
 	globalPrimaryPackage     = "golang"
 	globalSecondaryPackage   = "gogo"
 	globalOnlyPrimaryPackage = true
-	globalLogger             = NewLogger(lion.GlobalLogger())
+	globalLogger             Logger
 	globalLock               = &sync.Mutex{}
+	globalJSONMarshaler      = &jsonpb.Marshaler{}
 )
 
 func init() {
 	if err := lion.RegisterEncoderDecoder(Encoding, newEncoderDecoder()); err != nil {
 		panic(err.Error())
 	}
+	lion.SetJSONMarshalFunc(DefaultJSONMarshalFunc)
 	lion.AddGlobalHook(setGlobalLogger)
 }
 

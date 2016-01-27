@@ -4,6 +4,7 @@ Package lion defines the main lion logging functionality.
 package lion // import "go.pedge.io/lion"
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"os"
@@ -20,6 +21,15 @@ var (
 	DefaultTimer = &timer{}
 	// DefaultErrorHandler is the default ErrorHandler.
 	DefaultErrorHandler = &errorHandler{}
+	// DefaultJSONMarshalFunc is the default JSONMarshalFunc.
+	DefaultJSONMarshalFunc = func(writer io.Writer, value interface{}) error {
+		data, err := json.Marshal(value)
+		if err != nil {
+			return err
+		}
+		_, err = writer.Write(data)
+		return err
+	}
 
 	// DiscardPusher is a Pusher that discards all logs.
 	DiscardPusher = discardPusherInstance
@@ -31,9 +41,10 @@ var (
 	// DefaultLogger is the default Logger.
 	DefaultLogger = NewLogger(DefaultPusher)
 
-	globalLogger = DefaultLogger
-	globalHooks  = make([]GlobalHook, 0)
-	globalLock   = &sync.Mutex{}
+	globalLogger          = DefaultLogger
+	globalJSONMarshalFunc = DefaultJSONMarshalFunc
+	globalHooks           = make([]GlobalHook, 0)
+	globalLock            = &sync.Mutex{}
 )
 
 // GlobalHook is a function that handles a change in the global Logger instance.
@@ -59,6 +70,16 @@ func SetLevel(level Level) {
 	globalLock.Lock()
 	defer globalLock.Unlock()
 	globalLogger = globalLogger.AtLevel(level)
+	for _, globalHook := range globalHooks {
+		globalHook(globalLogger)
+	}
+}
+
+// SetJSONMarshalFunc sets the global JSONMarshalFunc to be used by default.
+func SetJSONMarshalFunc(jsonMarshalFunc JSONMarshalFunc) {
+	globalLock.Lock()
+	defer globalLock.Unlock()
+	globalJSONMarshalFunc = jsonMarshalFunc
 	for _, globalHook := range globalHooks {
 		globalHook(globalLogger)
 	}
@@ -371,6 +392,19 @@ func TextMarshallerDisableContexts() TextMarshallerOption {
 func TextMarshallerDisableNewlines() TextMarshallerOption {
 	return func(textMarshaller *textMarshaller) {
 		textMarshaller.disableNewlines = true
+	}
+}
+
+// JSONMarshalFunc marshals JSON for a TextMarshaller.
+//
+// It is used internally in a TextMarshaller, and is not a Marshaller itself.
+type JSONMarshalFunc func(writer io.Writer, value interface{}) error
+
+// TextMarshallerWithJSONMarshalFunc uses the given JSONMarshalFunc for JSON marshalling. The default
+// behavior is to use the global JSONMarshalFunc.
+func TextMarshallerWithJSONMarshalFunc(jsonMarshalFunc JSONMarshalFunc) TextMarshallerOption {
+	return func(textMarshaller *textMarshaller) {
+		textMarshaller.jsonMarshalFunc = jsonMarshalFunc
 	}
 }
 

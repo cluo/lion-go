@@ -30,6 +30,6 @@ func newLogger(l lion.Logger) *logger {
 }
 
 func (l *logger) Log(keyvals ...interface{}) error {
-	l.l.WithKeyValues(keyvals).Println()
+	l.l.WithKeyValues(keyvals...).Println()
 	return nil
 }

@@ -45,6 +45,12 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 		},
 	)
 	logger.Info(&Empty{})
+	logger.Info(&NoStdJson{
+		One: map[uint64]string{
+			1: "one",
+			2: "two",
+		},
+	})
 	writer := logger.InfoWriter()
 	for _, s := range []string{
 		"hello",
@@ -78,9 +84,10 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 	}
 	require.Equal(
 		t,
-		`DEBUG lion.testing.Foo {"string_field":"one","int32_field":2}
+		`DEBUG lion.testing.Foo {"one":"","two":0,"string_field":"one","int32_field":2}
 INFO  lion.testing.Baz {"bat":{"ban":{"string_field":"one","int32_field":2}}}
 INFO  lion.testing.Empty {}
+INFO  lion.testing.NoStdJson {"one":{"1":"one","2":"two"}}
 INFO  hello
 INFO  world
 INFO  writing
@@ -100,7 +107,7 @@ func TestPrintSomeStuff(t *testing.T) {
 }
 
 func testPrintSomeStuff(t *testing.T, logger protolion.Logger) {
-	logger.Debug(
+	logger.Info(
 		&Foo{
 			StringField: "one",
 			Int32Field:  2,
@@ -141,6 +148,7 @@ func testPrintSomeStuff(t *testing.T, logger protolion.Logger) {
 			},
 		},
 	)
+	logger.WithKeyValues("someKey", "someValue", "someOtherKey", 1).Infoln()
 	_ = kitlion.NewLogger(logger.LionLogger()).Log("someKey", "someValue", "someOtherKey", 1)
 }
 
