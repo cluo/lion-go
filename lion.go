@@ -1,5 +1,5 @@
 /*
-Package lion defines the main lion logging functionality.
+Package lion provides structured logging, configurable to use serialization protocols such as Protocol Buffers.
 */
 package lion // import "go.pedge.io/lion"
 
