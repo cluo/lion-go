@@ -22,10 +22,10 @@ var (
 	// DelimitedUnmarshaller is an Unmarshaller that uses the protocol buffers write delimited scheme.
 	DelimitedUnmarshaller = newDelimitedUnmarshaller(false)
 	// Base64DelimitedMarshaller is a Marshaller that uses the protocol buffers write delimited scheme,
-	// but encodes the encoded protocol buffer message using base64.StdEncoding.
+	// but encodes the encoded protocol buffer message using base64.StdEncoding, and a newline is added.
 	Base64DelimitedMarshaller = newDelimitedMarshaller(true)
 	// Base64DelimitedUnmarshaller is an Unmarshaller that uses the protocol buffers write delimited scheme,
-	// but decoded the encoded protocol buffer message using base64.StdEncoding.
+	// but decoded the encoded protocol buffer message using base64.StdEncoding, and a newline is added.
 	Base64DelimitedUnmarshaller = newDelimitedUnmarshaller(true)
 	// DefaultJSONMarshalFunc is the default protocol buffers JSONMarshalFunc.
 	DefaultJSONMarshalFunc = func(writer io.Writer, data interface{}) error {

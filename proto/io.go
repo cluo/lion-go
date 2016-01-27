@@ -23,7 +23,7 @@ var errInvalidVarint = errors.New("invalid varint32 encountered")
 // encoded messages of the same type together in a file.  It returns the total
 // number of bytes written and any applicable error.  This is roughly
 // equivalent to the companion Java API's MessageLite#writeDelimitedTo.
-func writeDelimited(w io.Writer, m proto.Message, base64Encode bool) (n int, err error) {
+func writeDelimited(w io.Writer, m proto.Message, base64Encode bool) (int, error) {
 	buffer, err := proto.Marshal(m)
 	if err != nil {
 		return 0, err
@@ -40,8 +40,16 @@ func writeDelimited(w io.Writer, m proto.Message, base64Encode bool) (n int, err
 		return sync, err
 	}
 
-	n, err = w.Write(buffer)
-	return n + sync, err
+	n, err := w.Write(buffer)
+	sync += n
+	if err != nil {
+		return sync, err
+	}
+	if base64Encode {
+		n, err = w.Write([]byte{'\n'})
+		sync += n
+	}
+	return sync, err
 }
 
 // readDelimited decodes a message from the provided length-delimited stream,
@@ -55,7 +63,7 @@ func writeDelimited(w io.Writer, m proto.Message, base64Encode bool) (n int, err
 // an error if a message has been read and decoded correctly, even if the end
 // of the stream has been reached in doing so.  In that case, any subsequent
 // calls return (0, io.EOF).
-func readDelimited(r io.Reader, m proto.Message, base64Decode bool) (n int, err error) {
+func readDelimited(r io.Reader, m proto.Message, base64Decode bool) (int, error) {
 	// Per AbstractParser#parsePartialDelimitedFrom with
 	// CodedInputStream#readRawVarint32.
 	headerBuf := make([]byte, binary.MaxVarintLen32)
@@ -93,9 +101,14 @@ func readDelimited(r io.Reader, m proto.Message, base64Decode bool) (n int, err 
 	if base64Decode {
 		messageBuf, err = base64.StdEncoding.DecodeString(string(messageBuf))
 		if err != nil {
-			return n, err
+			return bytesRead, err
+		}
+		newlineBuf := make([]byte, 1)
+		n, err := io.ReadFull(r, newlineBuf)
+		bytesRead += n
+		if err != nil {
+			return bytesRead, err
 		}
 	}
-
 	return bytesRead, proto.Unmarshal(messageBuf, m)
 }

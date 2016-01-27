@@ -51,7 +51,8 @@ func (m *delimitedMarshaller) Marshal(entry *lion.Entry) ([]byte, error) {
 	if _, err := writeDelimited(buffer, protoEntry, m.base64Encode); err != nil {
 		return nil, err
 	}
-	return buffer.Bytes(), nil
+	data := buffer.Bytes()
+	return data, nil
 }
 
 type delimitedUnmarshaller struct {

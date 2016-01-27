@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"os"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -11,12 +13,13 @@ import (
 	"go.pedge.io/lion"
 	"go.pedge.io/lion/kit"
 	"go.pedge.io/lion/proto"
+	"go.pedge.io/lion/tail"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestRoundtripAndTextMarshaller(t *testing.T) {
-	testRoundTripAndTextMarshaller(
+	testBothRoundTripAndTextMarshaller(
 		t,
 		func(logger protolion.Logger) {
 			logger.Debug(
@@ -85,7 +88,7 @@ WARN  a warning line {"someKey":"someValue"}
 }
 
 func TestLevelNone(t *testing.T) {
-	testRoundTripAndTextMarshaller(
+	testBothRoundTripAndTextMarshaller(
 		t,
 		func(logger protolion.Logger) {
 			logger = logger.AtLevel(lion.LevelPanic)
@@ -96,6 +99,11 @@ func TestLevelNone(t *testing.T) {
 		},
 		"NONE  hello\nNONE  hello2\n",
 	)
+}
+
+func testBothRoundTripAndTextMarshaller(t *testing.T, f func(protolion.Logger), expected string) {
+	testRoundTripAndTextMarshaller(t, f, expected)
+	//testRoundTripAndTextMarshallerTail(t, f, expected)
 }
 
 func testRoundTripAndTextMarshaller(t *testing.T, f func(protolion.Logger), expected string) {
@@ -142,6 +150,46 @@ func testRoundTripAndTextMarshaller(t *testing.T, f func(protolion.Logger), expe
 		}
 		require.Equal(t, expected, writeBuffer.String())
 	}
+}
+
+func testRoundTripAndTextMarshallerTail(t *testing.T, f func(protolion.Logger), expected string) {
+	file, err := ioutil.TempFile("", "lion")
+	require.NoError(t, err)
+	filePath := file.Name()
+	// will not actually get called if a require statement is hit
+	defer func() {
+		_ = file.Close()
+		_ = os.Remove(filePath)
+
+	}()
+	fakeTimer := newFakeTimer(0)
+	logger := protolion.NewLogger(
+		lion.NewLogger(
+			lion.NewWritePusher(
+				file,
+				protolion.Base64DelimitedMarshaller,
+			),
+			lion.LoggerWithIDAllocator(newFakeIDAllocator()),
+			lion.LoggerWithTimer(fakeTimer),
+		),
+	)
+	f(logger)
+	writeBuffer := bytes.NewBuffer(nil)
+	writePusher := lion.NewTextWritePusher(
+		writeBuffer,
+		lion.TextMarshallerDisableTime(),
+	)
+	require.NoError(
+		t,
+		taillion.Tail(
+			filePath,
+			protolion.Base64DelimitedUnmarshaller,
+			writePusher.Push,
+			nil,
+			taillion.TailOptions{},
+		),
+	)
+	require.Equal(t, expected, writeBuffer.String())
 }
 
 func TestPrintSomeStuff(t *testing.T) {
