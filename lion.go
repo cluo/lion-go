@@ -499,3 +499,8 @@ func WithField(key string, value interface{}) Logger {
 func WithFields(fields map[string]interface{}) Logger {
 	return globalLogger.WithFields(fields)
 }
+
+// WithKeyValues calls WithKeyValues on the global Logger.
+func WithKeyValues(keyValues ...interface{}) Logger {
+	return globalLogger.WithKeyValues(keyValues...)
+}
