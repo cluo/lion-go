@@ -18,9 +18,15 @@ var (
 	Encoding = "proto"
 
 	// DelimitedMarshaller is a Marshaller that uses the protocol buffers write delimited scheme.
-	DelimitedMarshaller = &delimitedMarshaller{}
+	DelimitedMarshaller = newDelimitedMarshaller(false)
 	// DelimitedUnmarshaller is an Unmarshaller that uses the protocol buffers write delimited scheme.
-	DelimitedUnmarshaller = &delimitedUnmarshaller{}
+	DelimitedUnmarshaller = newDelimitedUnmarshaller(false)
+	// Base64DelimitedMarshaller is a Marshaller that uses the protocol buffers write delimited scheme,
+	// but encodes the encoded protocol buffer message using base64.StdEncoding.
+	Base64DelimitedMarshaller = newDelimitedMarshaller(true)
+	// Base64DelimitedUnmarshaller is an Unmarshaller that uses the protocol buffers write delimited scheme,
+	// but decoded the encoded protocol buffer message using base64.StdEncoding.
+	Base64DelimitedUnmarshaller = newDelimitedUnmarshaller(true)
 	// DefaultJSONMarshalFunc is the default protocol buffers JSONMarshalFunc.
 	DefaultJSONMarshalFunc = func(writer io.Writer, data interface{}) error {
 		if message, ok := data.(proto.Message); ok {

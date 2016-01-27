@@ -99,35 +99,49 @@ func TestLevelNone(t *testing.T) {
 }
 
 func testRoundTripAndTextMarshaller(t *testing.T, f func(protolion.Logger), expected string) {
-	buffer := bytes.NewBuffer(nil)
-	fakeTimer := newFakeTimer(0)
-	logger := protolion.NewLogger(
-		lion.NewLogger(
-			lion.NewWritePusher(
-				buffer,
-				protolion.DelimitedMarshaller,
+	for _, marshalPair := range []struct {
+		marshaller   lion.Marshaller
+		unmarshaller lion.Unmarshaller
+	}{
+		{
+			protolion.DelimitedMarshaller,
+			protolion.DelimitedUnmarshaller,
+		},
+		{
+			protolion.Base64DelimitedMarshaller,
+			protolion.Base64DelimitedUnmarshaller,
+		},
+	} {
+		buffer := bytes.NewBuffer(nil)
+		fakeTimer := newFakeTimer(0)
+		logger := protolion.NewLogger(
+			lion.NewLogger(
+				lion.NewWritePusher(
+					buffer,
+					marshalPair.marshaller,
+				),
+				lion.LoggerWithIDAllocator(newFakeIDAllocator()),
+				lion.LoggerWithTimer(fakeTimer),
 			),
-			lion.LoggerWithIDAllocator(newFakeIDAllocator()),
-			lion.LoggerWithTimer(fakeTimer),
-		),
-	)
-	f(logger)
-	puller := lion.NewReadPuller(
-		buffer,
-		protolion.DelimitedUnmarshaller,
-	)
-	writeBuffer := bytes.NewBuffer(nil)
-	writePusher := lion.NewTextWritePusher(
-		writeBuffer,
-		lion.TextMarshallerDisableTime(),
-	)
-	for encodedEntry, pullErr := puller.Pull(); pullErr != io.EOF; encodedEntry, pullErr = puller.Pull() {
-		require.NoError(t, pullErr)
-		entry, err := encodedEntry.Decode()
-		require.NoError(t, err)
-		require.NoError(t, writePusher.Push(entry))
+		)
+		f(logger)
+		puller := lion.NewReadPuller(
+			buffer,
+			marshalPair.unmarshaller,
+		)
+		writeBuffer := bytes.NewBuffer(nil)
+		writePusher := lion.NewTextWritePusher(
+			writeBuffer,
+			lion.TextMarshallerDisableTime(),
+		)
+		for encodedEntry, pullErr := puller.Pull(); pullErr != io.EOF; encodedEntry, pullErr = puller.Pull() {
+			require.NoError(t, pullErr)
+			entry, err := encodedEntry.Decode()
+			require.NoError(t, err)
+			require.NoError(t, writePusher.Push(entry))
+		}
+		require.Equal(t, expected, writeBuffer.String())
 	}
-	require.Equal(t, expected, writeBuffer.String())
 }
 
 func TestPrintSomeStuff(t *testing.T) {
