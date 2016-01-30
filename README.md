@@ -6,3 +6,5 @@
 ```shell
 go get go.pedge.io/lion
 ```
+
+Documentation coming soon, have not got around to it yet.
