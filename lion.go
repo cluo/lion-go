@@ -31,6 +31,9 @@ var (
 		return err
 	}
 
+	// JSONMarshaller is a Marshaller that marshals to JSON.
+	JSONMarshaller = newJSONMarshaller()
+
 	// DiscardPusher is a Pusher that discards all logs.
 	DiscardPusher = discardPusherInstance
 	// DiscardLogger is a Logger that discards all logs.
