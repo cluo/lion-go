@@ -18,7 +18,7 @@ Documentation in the form of me copying and pasting part of a Slack convo I had,
 
 ```
 It needs about 20 hours to document
-But it's super configurable, optionally high performance, and with plugins
+But it's super configurable, optionally "high performance" (I mean, not really high performance, but higher than existing widely-used loggers other than maybe glog), and with plugins
 It's literally almost completely compatible with logrus
 And it benchmarks way better
 The real original power of the design is protolion
