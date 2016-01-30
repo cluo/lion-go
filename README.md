@@ -8,3 +8,8 @@ go get go.pedge.io/lion
 ```
 
 Documentation coming soon, have not got around to it yet.
+
+All public types are in [lion.go](lion.go) and [lion_level.go](lion_level.go).
+
+In sub packages, are public types are in `nameofpackage.go`, and `nameofpackage.pb.go` in the case of `protolion`. Some of them need to be renamed,
+ie [syslog/syslog.go](syslog/syslog.go) should be `syslog/sysloglion.go`, this is a holdover from the previous iteration of lion, called protolog.
