@@ -34,21 +34,34 @@ func NewPusher(
 	return sysloglion.NewPusher(
 		writer,
 		sysloglion.PusherWithMarshaller(
-			newMarshaller(
-				token,
-				false,
-				true,
+			NewMarshaller(
+				MarshallerWithToken(token),
+				MarshallerDisableNewlines(),
 			),
 		),
 	), nil
 }
 
-// NewMarshaller returns a new Marshaller that marshals messages into JSON, appropriate
+// MarshallerOption is an option for creating Marshallers.
+type MarshallerOption func(*marshaller)
+
+// MarshallerWithToken will add @current:token before every marshalled Entry.
+// This is used for syslog output.
+func MarshallerWithToken(token string) MarshallerOption {
+	return func(marshaller *marshaller) {
+		marshaller.token = token
+	}
+}
+
+// MarshallerDisableNewlines disables newlines after each marshalled Entry.
+func MarshallerDisableNewlines() MarshallerOption {
+	return func(marshaller *marshaller) {
+		marshaller.disableNewlines = true
+	}
+}
+
+// NewMarshaller returns a new Marshaller that marshals messages into , appropriate
 // to send to an io.Writer that can be tailed by the current cli tool.
-func NewMarshaller() lion.Marshaller {
-	return newMarshaller(
-		"",
-		true,
-		false,
-	)
+func NewMarshaller(options ...MarshallerOption) lion.Marshaller {
+	return newMarshaller(options...)
 }

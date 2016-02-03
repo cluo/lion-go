@@ -9,27 +9,21 @@ import (
 
 type marshaller struct {
 	token           string
-	disableHeader   bool
 	disableNewlines bool
 }
 
-func newMarshaller(
-	token string,
-	disableHeader bool,
-	disableNewlines bool,
-) *marshaller {
-	return &marshaller{
-		token,
-		disableHeader,
-		disableNewlines,
+func newMarshaller(options ...MarshallerOption) *marshaller {
+	marshaller := &marshaller{"", false}
+	for _, option := range options {
+		option(marshaller)
 	}
+	return marshaller
 }
 
 func (t *marshaller) Marshal(entry *lion.Entry) ([]byte, error) {
 	return jsonMarshalEntry(
 		entry,
 		t.token,
-		t.disableHeader,
 		t.disableNewlines,
 	)
 }
@@ -37,7 +31,6 @@ func (t *marshaller) Marshal(entry *lion.Entry) ([]byte, error) {
 func jsonMarshalEntry(
 	entry *lion.Entry,
 	token string,
-	disableHeader bool,
 	disableNewlines bool,
 ) ([]byte, error) {
 	jsonEntry, err := entryToJSONEntry(entry)
@@ -48,7 +41,7 @@ func jsonMarshalEntry(
 		return nil, nil
 	}
 	buffer := bytes.NewBuffer(nil)
-	if !disableHeader {
+	if token != "" {
 		_, _ = buffer.WriteString("@current:")
 		_, _ = buffer.WriteString(token)
 		_ = buffer.WriteByte(' ')
