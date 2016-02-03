@@ -1,3 +1,8 @@
+/*
+Package currentlion implements basic integration with Current using plaintext syslog.
+
+https://current.sh
+*/
 package currentlion // import "go.pedge.io/lion/current"
 
 import (
