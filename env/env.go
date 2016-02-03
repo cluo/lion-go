@@ -12,6 +12,7 @@ import (
 
 	"go.pedge.io/env"
 	"go.pedge.io/lion"
+	"go.pedge.io/lion/current"
 	"go.pedge.io/lion/syslog"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -35,6 +36,12 @@ type Env struct {
 	// Must be set with SyslogNetwork.
 	// If not set and LogDir not set, logs will be to stderr.
 	SyslogAddress string `env:"SYSLOG_ADDRESS"`
+	// The current token.
+	// Must be set with CurrentSyslogNetwork.
+	CurrentToken string `env:"CURRENT_TOKEN"`
+	// The current syslog host:port.
+	// Must be set with CurrentToken.
+	CurrentSyslogAddress string `env:"CURRENT_SYSLOG_ADDRESS"`
 }
 
 // Setup gets the Env from the environment, and then calls SetupEnv.
@@ -61,6 +68,13 @@ func SetupEnv(env Env) error {
 	}
 	if env.SyslogNetwork != "" && env.SyslogAddress != "" {
 		pusher, err := newSyslogPusher(env.SyslogNetwork, env.SyslogAddress, logAppName)
+		if err != nil {
+			return err
+		}
+		pushers = append(pushers, pusher)
+	}
+	if env.CurrentToken != "" && env.CurrentSyslogAddress != "" {
+		pusher, err := currentlion.NewPusher(logAppName, env.CurrentSyslogAddress, env.CurrentToken)
 		if err != nil {
 			return err
 		}

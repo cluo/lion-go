@@ -59,6 +59,11 @@ func GlobalLogger() Logger {
 	return globalLogger
 }
 
+// GlobalJSONMarshalFunc returns the global JSONMarshalFunc instance.
+func GlobalJSONMarshalFunc() JSONMarshalFunc {
+	return globalJSONMarshalFunc
+}
+
 // SetLogger sets the global Logger instance.
 func SetLogger(logger Logger) {
 	globalLock.Lock()
