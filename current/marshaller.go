@@ -8,18 +8,38 @@ import (
 )
 
 type marshaller struct {
-	token string
+	token           string
+	disableHeader   bool
+	disableNewlines bool
 }
 
-func newMarshaller(token string) *marshaller {
-	return &marshaller{token}
+func newMarshaller(
+	token string,
+	disableHeader bool,
+	disableNewlines bool,
+) *marshaller {
+	return &marshaller{
+		token,
+		disableHeader,
+		disableNewlines,
+	}
 }
 
 func (t *marshaller) Marshal(entry *lion.Entry) ([]byte, error) {
-	return jsonMarshalEntry(entry, t.token)
+	return jsonMarshalEntry(
+		entry,
+		t.token,
+		t.disableHeader,
+		t.disableNewlines,
+	)
 }
 
-func jsonMarshalEntry(entry *lion.Entry, token string) ([]byte, error) {
+func jsonMarshalEntry(
+	entry *lion.Entry,
+	token string,
+	disableHeader bool,
+	disableNewlines bool,
+) ([]byte, error) {
 	jsonEntry, err := entryToJSONEntry(entry)
 	if err != nil {
 		return nil, err
@@ -28,11 +48,16 @@ func jsonMarshalEntry(entry *lion.Entry, token string) ([]byte, error) {
 		return nil, nil
 	}
 	buffer := bytes.NewBuffer(nil)
-	_, _ = buffer.WriteString("@current:")
-	_, _ = buffer.WriteString(token)
-	_ = buffer.WriteByte(' ')
+	if !disableHeader {
+		_, _ = buffer.WriteString("@current:")
+		_, _ = buffer.WriteString(token)
+		_ = buffer.WriteByte(' ')
+	}
 	if err := lion.GlobalJSONMarshalFunc()(buffer, jsonEntry); err != nil {
 		return nil, err
+	}
+	if !disableNewlines {
+		_ = buffer.WriteByte('\n')
 	}
 	return buffer.Bytes(), nil
 }

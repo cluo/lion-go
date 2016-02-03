@@ -34,7 +34,21 @@ func NewPusher(
 	return sysloglion.NewPusher(
 		writer,
 		sysloglion.PusherWithMarshaller(
-			newMarshaller(token),
+			newMarshaller(
+				token,
+				false,
+				true,
+			),
 		),
 	), nil
+}
+
+// NewMarshaller returns a new Marshaller that marshals messages into JSON, appropriate
+// to send to an io.Writer that can be tailed by the current cli tool.
+func NewMarshaller() lion.Marshaller {
+	return newMarshaller(
+		"",
+		true,
+		false,
+	)
 }

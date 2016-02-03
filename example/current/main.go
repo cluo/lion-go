@@ -3,10 +3,11 @@ Package main implements an example integration with Current.
 
 https://current.sh
 
-Set the CURRENT_TOKEN and CURRENT_SYSLOG_ADDRESS environment variables to match the output of current syslog -n <org>.
-Only plaintext connections are supported for now.
+To use with syslog, run ./syslog.bash <org>.
+
+To use with the current cli tool, run using ./stdout.bash <org>.
+
 To output the debug messages, set the LOG_LEVEL environment variable to DEBUG.
-Run using make run.
 */
 package main
 

@@ -37,11 +37,13 @@ type Env struct {
 	// If not set and LogDir not set, logs will be to stderr.
 	SyslogAddress string `env:"SYSLOG_ADDRESS"`
 	// The current token.
-	// Must be set with CurrentSyslogNetwork.
+	// Must be set with CurrentSyslogNetwork or CurrentStderr.
 	CurrentToken string `env:"CURRENT_TOKEN"`
 	// The current syslog host:port.
 	// Must be set with CurrentToken.
 	CurrentSyslogAddress string `env:"CURRENT_SYSLOG_ADDRESS"`
+	// Output logs in current format to stdout.
+	CurrentStdout bool `env:"CURRENT_STDOUT"`
 }
 
 // Setup gets the Env from the environment, and then calls SetupEnv.
@@ -62,6 +64,9 @@ func SetupEnv(env Env) error {
 	}
 	if !env.LogDisableStderr {
 		pushers = append(pushers, lion.NewTextWritePusher(os.Stderr))
+	}
+	if env.CurrentStdout {
+		pushers = append(pushers, lion.NewWritePusher(os.Stdout, currentlion.NewMarshaller()))
 	}
 	if env.LogDirPath != "" {
 		pushers = append(pushers, newLogDirPusher(env.LogDirPath, logAppName))
