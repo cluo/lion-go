@@ -31,8 +31,8 @@ var (
 		return err
 	}
 
-	// JSONMarshaller is a Marshaller that marshals to JSON.
-	JSONMarshaller = newJSONMarshaller()
+	// DefaultJSONMarshaller is the default JSON Marshaller.
+	DefaultJSONMarshaller = NewJSONMarshaller()
 
 	// DiscardPusher is a Pusher that discards all logs.
 	DiscardPusher = discardPusherInstance
@@ -388,6 +388,14 @@ func NewTextWritePusher(writer io.Writer, textMarshallerOptions ...TextMarshalle
 	)
 }
 
+// NewJSONWritePusher constructs a new Pusher using a JSON Marshaller.
+func NewJSONWritePusher(writer io.Writer, jsonMarshallerOptions ...JSONMarshallerOption) Pusher {
+	return NewWritePusher(
+		writer,
+		NewJSONMarshaller(jsonMarshallerOptions...),
+	)
+}
+
 // Puller pulls EncodedEntry objects from a persistent store.
 type Puller interface {
 	Pull() (*EncodedEntry, error)
@@ -451,6 +459,21 @@ func TextMarshallerDisableNewlines() TextMarshallerOption {
 // marshalled Entry objects. This Marshaller is currently inefficient.
 func NewTextMarshaller(options ...TextMarshallerOption) TextMarshaller {
 	return newTextMarshaller(options...)
+}
+
+// JSONMarshallerDisableNewlines disables newlines after each marshalled Entry.
+func JSONMarshallerDisableNewlines() JSONMarshallerOption {
+	return func(jsonMarshaller *jsonMarshaller) {
+		jsonMarshaller.disableNewlines = true
+	}
+}
+
+// JSONMarshallerOption is an option for creating Marshallers.
+type JSONMarshallerOption func(*jsonMarshaller)
+
+// NewJSONMarshaller constructs a new Marshaller for JSON.
+func NewJSONMarshaller(options ...JSONMarshallerOption) Marshaller {
+	return newJSONMarshaller(options...)
 }
 
 // NewMultiPusher constructs a new Pusher that calls all the given Pushers.
