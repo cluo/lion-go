@@ -43,6 +43,20 @@ func setGlobalLogger(logger lion.Logger) {
 	globalLevel = logger.Level()
 }
 
+// MustRegister calls Register and panics on error.
+func MustRegister(constructor interface{}) {
+	if err := Register(constructor); err != nil {
+		panic(err.Error())
+	}
+}
+
+// Register registers the given thrift.TStruct using the generated constructor.
+//
+// The given constructor must be of the correct type.
+func Register(constructor interface{}) error {
+	return register(constructor)
+}
+
 // LevelLogger is a lion.LevelLogger that also has proto logging methods.
 type LevelLogger interface {
 	lion.BaseLevelLogger

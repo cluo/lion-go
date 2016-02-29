@@ -9,22 +9,19 @@ import (
 )
 
 var (
-	nameToConstructor = make(map[string]func() thrift.TStruct)
-	lock              sync.RWMutex
+	tStructReflectType = reflect.TypeOf((*thrift.TStruct)(nil)).Elem()
+	nameToConstructor  = make(map[string]func() thrift.TStruct)
+	lock               sync.RWMutex
 )
 
-// MustRegister calls Register and panics on error.
-func MustRegister(constructor func() thrift.TStruct) {
-	if err := Register(constructor); err != nil {
-		panic(err.Error())
-	}
-}
-
-// Register registers the given thrift.TStruct using the generated constructor.
-func Register(constructor func() thrift.TStruct) error {
+func register(constructorObj interface{}) error {
 	lock.Lock()
 	defer lock.Unlock()
 
+	constructor, err := castConstuctorObj(constructorObj)
+	if err != nil {
+		return err
+	}
 	name := getName(constructor())
 	if _, ok := nameToConstructor[name]; ok {
 		return fmt.Errorf("thriftlion: duplicate name %s", name)
@@ -39,6 +36,27 @@ func newTStruct(name string) (thrift.TStruct, error) {
 		return nil, err
 	}
 	return constructor(), nil
+}
+
+func castConstuctorObj(constructorObj interface{}) (func() thrift.TStruct, error) {
+	reflectValue := reflect.ValueOf(constructorObj)
+	reflectType := reflectValue.Type()
+	if reflectType.Kind() != reflect.Func {
+		return nil, fmt.Errorf("thriftlion: %T is not a function", constructorObj)
+	}
+	if reflectType.NumIn() != 0 {
+		return nil, fmt.Errorf("thriftlion: %T is not a constructor, must have zero arguments", constructorObj)
+	}
+	if reflectType.NumOut() != 1 {
+		return nil, fmt.Errorf("thriftlion: %T is not a constructor, must have one return value", constructorObj)
+	}
+	if !reflectType.Out(0).AssignableTo(tStructReflectType) {
+		return nil, fmt.Errorf("thriftlion: %T is not a constructor, must have a thrift.TStruct return value", constructorObj)
+	}
+	constructorOutReflectType := reflectType.Out(0).Elem()
+	return func() thrift.TStruct {
+		return reflect.New(constructorOutReflectType).Interface().(thrift.TStruct)
+	}, nil
 }
 
 func getConstructor(name string) (func() thrift.TStruct, error) {

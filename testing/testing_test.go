@@ -14,9 +14,14 @@ import (
 	"go.pedge.io/lion/kit"
 	"go.pedge.io/lion/proto"
 	"go.pedge.io/lion/tail"
+	"go.pedge.io/lion/thrift"
 
 	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	thriftlion.MustRegister(NewTFoo)
+}
 
 func TestRoundtripAndTextMarshaller(t *testing.T) {
 	testBothRoundTripAndTextMarshaller(
