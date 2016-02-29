@@ -50,6 +50,9 @@ thrift:
 	thrift --strict --gen go thrift/thriftlion.thrift
 	mv gen-go/thriftlion/* thrift/
 	rm -rf gen-go
+	thrift --strict --gen go testing/testing.thrift
+	mv gen-go/testinglion/* testing/
+	rm -rf gen-go
 
 .PHONY: \
 	all \
