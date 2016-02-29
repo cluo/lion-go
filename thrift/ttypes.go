@@ -6,6 +6,7 @@ package thriftlion
 import (
 	"bytes"
 	"fmt"
+
 	"git.apache.org/thrift.git/lib/go/thrift"
 )
 
