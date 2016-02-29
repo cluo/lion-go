@@ -17,7 +17,7 @@ build: deps
 
 lint: testdeps
 	go get -v github.com/golang/lint/golint
-	for file in $$(find . -name '*.go' | grep -v '\.pb\.go' | grep -v 'testing/'); do \
+	for file in $$(find . -name '*.go' | grep -v '\.pb\.go' | grep -v 'constants.go' | grep -v 'ttypes.go' | grep -v 'testing/'); do \
 		golint $$file | grep -v underscore; \
 		if [ -n "$$(golint $$file | grep -v underscore)" ]; then \
 			exit 1; \
@@ -45,6 +45,12 @@ proto:
 	protoeasy --go --go-import-path go.pedge.io/lion .
 	find . -name *\.pb\*\.go | xargs strip-package-comments
 
+thrift:
+	rm -rf gen-go
+	thrift --strict --gen go thrift/thriftlion.thrift
+	mv gen-go/thriftlion/* thrift/
+	rm -rf gen-go
+
 .PHONY: \
 	all \
 	deps \
@@ -58,4 +64,5 @@ proto:
 	pretest \
 	test \
 	clean \
-	proto
+	proto \
+	thrift
