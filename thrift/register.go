@@ -71,6 +71,7 @@ func getConstructor(name string) (func() thrift.TStruct, error) {
 }
 
 func getName(tStruct thrift.TStruct) string {
-	reflectType := reflect.TypeOf(tStruct)
-	return fmt.Sprintf("%s.%s", reflectType.PkgPath(), reflectType.Name())
+	//reflectType := reflect.TypeOf(tStruct)
+	//return fmt.Sprintf("%s.%s", reflectType.PkgPath(), reflectType.Name())
+	return reflect.TypeOf(tStruct).String()
 }

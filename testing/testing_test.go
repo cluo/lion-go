@@ -21,6 +21,12 @@ import (
 
 func init() {
 	thriftlion.MustRegister(NewTFoo)
+	thriftlion.MustRegister(NewTBar)
+	thriftlion.MustRegister(NewTBaz)
+	thriftlion.MustRegister(NewTBat)
+	thriftlion.MustRegister(NewTBan)
+	thriftlion.MustRegister(NewTEmpty)
+	thriftlion.MustRegister(NewTNoStdJson)
 }
 
 func TestRoundtripAndTextMarshaller(t *testing.T) {
