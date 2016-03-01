@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package lion.testing;
+package lion.proto.testing;
 
-option go_package = "testinglion";
+option go_package = "protoliontesting";
 
 message Foo {
   string one = 1;

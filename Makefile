@@ -33,8 +33,13 @@ errcheck: testdeps
 
 pretest: lint vet errcheck
 
-test: testdeps pretest
-	go test -v ./testing
+prototest: testdeps
+	go test -v ./proto/testing
+
+thrifttest: testdeps
+	go test -v ./thrift/testing
+
+test: pretest prototest thrifttest
 
 clean:
 	go clean -i ./...
@@ -50,8 +55,8 @@ thrift:
 	thrift --strict --gen go thrift/thriftlion.thrift
 	mv gen-go/thriftlion/* thrift/
 	rm -rf gen-go
-	thrift --strict --gen go testing/testing.thrift
-	mv gen-go/testinglion/* testing/
+	thrift --strict --gen go thrift/testing/testing.thrift
+	mv gen-go/thriftliontesting/* thrift/testing/
 	rm -rf gen-go
 
 .PHONY: \
@@ -65,6 +70,8 @@ thrift:
 	vet \
 	errcheck \
 	pretest \
+	prototest \
+	thrifttest \
 	test \
 	clean \
 	proto \
