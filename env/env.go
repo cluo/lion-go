@@ -11,6 +11,7 @@ import (
 	"go.pedge.io/env"
 	"go.pedge.io/lion"
 	"go.pedge.io/lion/current"
+	"go.pedge.io/lion/grpc"
 	"go.pedge.io/lion/syslog"
 )
 
@@ -85,6 +86,7 @@ func SetupEnv(env Env) error {
 		lion.SetLogger(lion.NewLogger(lion.NewMultiPusher(pushers...)))
 	}
 	lion.RedirectStdLogger()
+	grpclion.RedirectGrpclog()
 	if env.LogLevel != "" {
 		level, err := lion.NameToLevel(strings.ToUpper(env.LogLevel))
 		if err != nil {
