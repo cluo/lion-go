@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/logging/v1beta3"
 )
 
-func Example() error {
+func Example() {
 	projectID, _ := os.LookupEnv("GCLOUD_PROJECT_ID")
 	logName := "lion"
 	client, err := google.DefaultClient(
@@ -18,11 +18,13 @@ func Example() error {
 		logging.LoggingWriteScope,
 	)
 	if err != nil {
-		return err
+		lion.Errorln(err)
+		return
 	}
 	service, err := logging.New(client)
 	if err != nil {
-		return err
+		lion.Errorln(err)
+		return
 	}
 	logger := lion.NewLogger(
 		gcloudlion.NewPusher(
@@ -32,5 +34,4 @@ func Example() error {
 		),
 	)
 	logger.Infoln("Hello from lion!")
-	return nil
 }

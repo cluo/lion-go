@@ -69,9 +69,9 @@ func TestRoundtripAndTextMarshaller(t *testing.T) {
 			logger.Infoln("a normal line")
 			logger.WithField("someKey", "someValue").Warnln("a warning line")
 		},
-		`INFO  lion.proto.testing.Foo {"string_field":"one","int32_field":2}
+		`INFO  lion.proto.testing.Foo {"stringField":"one","int32Field":2}
 INFO  hello2 {"3":"4"}
-INFO  lion.proto.testing.Baz {"bat":{"ban":{"string_field":"one","int32_field":2}}}
+INFO  lion.proto.testing.Baz {"bat":{"ban":{"stringField":"one","int32Field":2}}}
 INFO  lion.proto.testing.Empty {}
 INFO  lion.proto.testing.NoStdJson {"one":{"1":"one","2":"two"}}
 INFO  hello
