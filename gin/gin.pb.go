@@ -37,6 +37,20 @@ func (m *Call) String() string            { return proto.CompactTextString(m) }
 func (*Call) ProtoMessage()               {}
 func (*Call) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
+func (m *Call) GetMethod() string {
+	if m != nil {
+		return m.Method
+	}
+	return ""
+}
+
+func (m *Call) GetPath() string {
+	if m != nil {
+		return m.Path
+	}
+	return ""
+}
+
 func (m *Call) GetQuery() map[string]string {
 	if m != nil {
 		return m.Query
@@ -44,9 +58,44 @@ func (m *Call) GetQuery() map[string]string {
 	return nil
 }
 
+func (m *Call) GetUserAgent() string {
+	if m != nil {
+		return m.UserAgent
+	}
+	return ""
+}
+
 func (m *Call) GetRequestForm() map[string]string {
 	if m != nil {
 		return m.RequestForm
+	}
+	return nil
+}
+
+func (m *Call) GetClientIp() string {
+	if m != nil {
+		return m.ClientIp
+	}
+	return ""
+}
+
+func (m *Call) GetStatusCode() uint32 {
+	if m != nil {
+		return m.StatusCode
+	}
+	return 0
+}
+
+func (m *Call) GetDuration() string {
+	if m != nil {
+		return m.Duration
+	}
+	return ""
+}
+
+func (m *Call) GetError() []string {
+	if m != nil {
+		return m.Error
 	}
 	return nil
 }

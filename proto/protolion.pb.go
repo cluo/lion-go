@@ -78,6 +78,20 @@ func (m *Entry) String() string            { return proto.CompactTextString(m) }
 func (*Entry) ProtoMessage()               {}
 func (*Entry) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
+func (m *Entry) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *Entry) GetLevel() Level {
+	if m != nil {
+		return m.Level
+	}
+	return Level_LEVEL_DEBUG
+}
+
 func (m *Entry) GetTimestamp() *google_protobuf.Timestamp {
 	if m != nil {
 		return m.Timestamp
@@ -106,6 +120,20 @@ func (m *Entry) GetEvent() *Entry_Message {
 	return nil
 }
 
+func (m *Entry) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
+func (m *Entry) GetWriterOutput() []byte {
+	if m != nil {
+		return m.WriterOutput
+	}
+	return nil
+}
+
 // Message represents a serialized protobuf message.
 // The name is the name registered with lion.
 type Entry_Message struct {
@@ -118,6 +146,27 @@ func (m *Entry_Message) Reset()                    { *m = Entry_Message{} }
 func (m *Entry_Message) String() string            { return proto.CompactTextString(m) }
 func (*Entry_Message) ProtoMessage()               {}
 func (*Entry_Message) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0, 0} }
+
+func (m *Entry_Message) GetEncoding() string {
+	if m != nil {
+		return m.Encoding
+	}
+	return ""
+}
+
+func (m *Entry_Message) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Entry_Message) GetValue() []byte {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
 
 func init() {
 	proto.RegisterType((*Entry)(nil), "lion.Entry")

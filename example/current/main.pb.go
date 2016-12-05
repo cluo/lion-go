@@ -28,6 +28,13 @@ func (m *Bar) String() string            { return proto.CompactTextString(m) }
 func (*Bar) ProtoMessage()               {}
 func (*Bar) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
+func (m *Bar) GetOne() string {
+	if m != nil {
+		return m.One
+	}
+	return ""
+}
+
 type Foo struct {
 	Bar   *Bar   `protobuf:"bytes,1,opt,name=bar" json:"bar,omitempty"`
 	Two   string `protobuf:"bytes,2,opt,name=two" json:"two,omitempty"`
@@ -44,6 +51,20 @@ func (m *Foo) GetBar() *Bar {
 		return m.Bar
 	}
 	return nil
+}
+
+func (m *Foo) GetTwo() string {
+	if m != nil {
+		return m.Two
+	}
+	return ""
+}
+
+func (m *Foo) GetThree() uint64 {
+	if m != nil {
+		return m.Three
+	}
+	return 0
 }
 
 func init() {

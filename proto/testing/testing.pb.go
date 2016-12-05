@@ -32,6 +32,34 @@ func (m *Foo) String() string            { return proto.CompactTextString(m) }
 func (*Foo) ProtoMessage()               {}
 func (*Foo) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
+func (m *Foo) GetOne() string {
+	if m != nil {
+		return m.One
+	}
+	return ""
+}
+
+func (m *Foo) GetTwo() int32 {
+	if m != nil {
+		return m.Two
+	}
+	return 0
+}
+
+func (m *Foo) GetStringField() string {
+	if m != nil {
+		return m.StringField
+	}
+	return ""
+}
+
+func (m *Foo) GetInt32Field() int32 {
+	if m != nil {
+		return m.Int32Field
+	}
+	return 0
+}
+
 func (m *Foo) GetBar() *Bar {
 	if m != nil {
 		return m.Bar
@@ -50,6 +78,34 @@ func (m *Bar) Reset()                    { *m = Bar{} }
 func (m *Bar) String() string            { return proto.CompactTextString(m) }
 func (*Bar) ProtoMessage()               {}
 func (*Bar) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *Bar) GetOne() string {
+	if m != nil {
+		return m.One
+	}
+	return ""
+}
+
+func (m *Bar) GetTwo() string {
+	if m != nil {
+		return m.Two
+	}
+	return ""
+}
+
+func (m *Bar) GetStringField() string {
+	if m != nil {
+		return m.StringField
+	}
+	return ""
+}
+
+func (m *Bar) GetInt32Field() int32 {
+	if m != nil {
+		return m.Int32Field
+	}
+	return 0
+}
 
 type Baz struct {
 	Bat *Baz_Bat `protobuf:"bytes,1,opt,name=bat" json:"bat,omitempty"`
@@ -92,6 +148,20 @@ func (m *Baz_Bat_Ban) Reset()                    { *m = Baz_Bat_Ban{} }
 func (m *Baz_Bat_Ban) String() string            { return proto.CompactTextString(m) }
 func (*Baz_Bat_Ban) ProtoMessage()               {}
 func (*Baz_Bat_Ban) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2, 0, 0} }
+
+func (m *Baz_Bat_Ban) GetStringField() string {
+	if m != nil {
+		return m.StringField
+	}
+	return ""
+}
+
+func (m *Baz_Bat_Ban) GetInt32Field() int32 {
+	if m != nil {
+		return m.Int32Field
+	}
+	return 0
+}
 
 type Empty struct {
 }
