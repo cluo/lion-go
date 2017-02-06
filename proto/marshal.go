@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"time"
 
 	"go.pedge.io/lion"
-	"go.pedge.io/pb/go/google/protobuf"
 )
 
 var (
@@ -94,7 +94,7 @@ func encodedEntryToProtoEntry(encodedEntry *lion.EncodedEntry) (*Entry, error) {
 	return &Entry{
 		Id:           encodedEntry.ID,
 		Level:        protoLevel,
-		Timestamp:    google_protobuf.TimeToProto(encodedEntry.Time),
+		Timestamp:    timeToProto(encodedEntry.Time),
 		Context:      contexts,
 		Fields:       encodedEntry.Fields,
 		Event:        event,
@@ -119,7 +119,7 @@ func protoEntryToEncodedEntry(protoEntry *Entry) (*lion.EncodedEntry, error) {
 	return &lion.EncodedEntry{
 		ID:           protoEntry.Id,
 		Level:        level,
-		Time:         protoEntry.Timestamp.GoTime(),
+		Time:         timeFromProto(protoEntry.Timestamp),
 		Contexts:     contexts,
 		Fields:       protoEntry.Fields,
 		Event:        event,
@@ -182,4 +182,21 @@ func entryMessageToMessage(entryMessage *Entry_Message) (*lion.EncodedEntryMessa
 		Name:     entryMessage.Name,
 		Value:    entryMessage.Value,
 	}, nil
+}
+
+func timeToProto(t time.Time) *Timestamp {
+	return &Timestamp{
+		Seconds: t.UnixNano() / int64(time.Second),
+		Nanos:   int32(t.UnixNano() % int64(time.Second)),
+	}
+}
+
+func timeFromProto(timestamp *Timestamp) time.Time {
+	if timestamp == nil {
+		return time.Unix(0, 0).UTC()
+	}
+	return time.Unix(
+		timestamp.Seconds,
+		int64(timestamp.Nanos),
+	).UTC()
 }
